@@ -1,0 +1,12 @@
+#include <iostream>
+#include <filesystem>
+using namespace std;
+int main() {
+    string path;
+    cout << "Enter path: ";
+    cin >> path;
+
+    for (const auto& entry : filesystem::directory_iterator(path)) {
+        cout << entry.path() << '\n';
+    }
+}
