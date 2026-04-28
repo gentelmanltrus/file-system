@@ -3,17 +3,30 @@
 Directory::Directory(const std::string &name)
     : FileSystemItem(name) {}
 
-void Directory::addItem(std::shared_ptr<FileSystemItem> item)
+bool Directory::contains(const std::string &name)
 {
-  items.push_back(item);
+    for (const auto &item : items)
+    {
+        if (item->getName() == name)
+            return true;
+    }
+    return false;
 }
 
-void Directory::display() const {
-        std::cout << "DIR: " << name << "\n";
-    }
+void Directory::addItem(std::shared_ptr<FileSystemItem> item)
+{
+    items.push_back(item);
+}
 
-    void Directory::listItems() const {
-        for (const auto& item : items) {
-            item->display();
-        }
+void Directory::display() const
+{
+    std::cout << "DIR: " << name << "\n";
+}
+
+void Directory::listItems() const
+{
+    for (const auto &item : items)
+    {
+        item->display();
     }
+}
