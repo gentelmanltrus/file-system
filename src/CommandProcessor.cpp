@@ -15,7 +15,15 @@ void CommandProcessor::processCommand(const std::string &input)
   {
     std::string fileName;
     ss >> fileName;
-    fs.touch(fileName);
+    try
+    {
+      fs.touch(fileName);
+    }
+    catch(const std::exception& e)
+    {
+      std::cerr << e.what() << '\n';
+    }
+    
   } // more commands, might need other solution
   else
     throw std::runtime_error("Invalid command");
