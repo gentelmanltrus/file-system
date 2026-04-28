@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "Directory.h"
 
 Directory::Directory(const std::string &name)
@@ -5,12 +6,10 @@ Directory::Directory(const std::string &name)
 
 bool Directory::contains(const std::string &name)
 {
-    for (const auto &item : items)
-    {
-        if (item->getName() == name)
-            return true;
-    }
-    return false;
+    if (find(items.begin(), items.end(), name) != items.end())
+        return true;
+    else
+        return false;
 }
 
 void Directory::addItem(std::shared_ptr<FileSystemItem> item)

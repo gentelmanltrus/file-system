@@ -1,3 +1,4 @@
+#include <sstream>
 #include "include/CommandProcessor.h"
 
 void CommandProcessor::run()
@@ -7,5 +8,16 @@ void CommandProcessor::run()
 
 void CommandProcessor::processCommand(const std::string &input) 
 {
-  // must be defined
+  std::stringstream ss(input); 
+  std::string commandName;
+  ss >> commandName;
+  if (commandName == "touch")
+  {
+    std::string fileName;
+    ss >> fileName;
+    fs.touch(fileName);
+  } // more commands, might need other solution
+  else
+    throw std::runtime_error("Invalid command");
+
 }
