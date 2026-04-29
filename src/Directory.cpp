@@ -6,10 +6,11 @@ Directory::Directory(const std::string &name)
 
 bool Directory::contains(const std::string &name)
 {
-    if (find(items.begin(), items.end(), name) != items.end())
-        return true;
-    else
-        return false;
+    return std::find_if(items.begin(), items.end(),
+        [&name](const std::shared_ptr<FileSystemItem>& item)
+        {
+            return item->getName() == name;
+        }) != items.end();
 }
 
 void Directory::addItem(std::shared_ptr<FileSystemItem> item)
