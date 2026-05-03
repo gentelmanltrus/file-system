@@ -6,9 +6,9 @@ void CommandProcessor::run()
   // must be defined
 }
 
-void CommandProcessor::processCommand(const std::string &input) 
+void CommandProcessor::processCommand(const std::string &input)
 {
-  std::stringstream ss(input); 
+  std::stringstream ss(input);
   std::string commandName;
   ss >> commandName;
   if (commandName == "touch")
@@ -16,6 +16,10 @@ void CommandProcessor::processCommand(const std::string &input)
     std::string fileName;
     ss >> fileName;
     fs.touch(fileName);
+  }
+  if (commandName == "ls")
+  {
+    fs.ls();
   } // more commands, might need other solution
   else
     throw std::runtime_error("Invalid command");

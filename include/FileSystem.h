@@ -1,5 +1,5 @@
-#ifndef FILESYSTEM_H_5482301
-#define FILESYSTEM_H_5482301
+#ifndef FILESYSTEM_H_28539235
+#define FILESYSTEM_H_28539235
 
 #include <memory>
 #include <string>
@@ -7,15 +7,11 @@
 
 class FileSystem
 {
-private:
-    std::shared_ptr<Directory> root;
-    std::shared_ptr<Directory> current;
-
 public:
     FileSystem();
 
-    void mkdir(const std::string &name);
-    void touch(const std::string &name);
-    void ls() const;
+    virtual void mkdir(const std::string &name);
+    virtual void touch(const std::string &name);
+    virtual void ls() const;
 };
-#endif // FILESYSTEM_H_5482301
+#endif // FILESYSTEM_H_28539235
