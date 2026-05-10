@@ -12,7 +12,12 @@ FileSystemVirtual::FileSystemVirtual()
 void FileSystemVirtual::mkdir(const std::string &name)
 {
   // might need some path/additional folder to the name
-  FileSystem::mkdir(name);
+   if (!current)
+    throw std::runtime_error("No current directory");
+  if (current->contains(name))
+        throw std::runtime_error("Directory or file already exists");
+  std::shared_ptr<Directory> newDir = std::make_shared<Directory>(name);
+  current->addItem(newDir);
 
   // must be defined
 }
