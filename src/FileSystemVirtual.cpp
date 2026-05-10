@@ -10,7 +10,8 @@ FileSystemVirtual::FileSystemVirtual()
 }
 
 void FileSystemVirtual::mkdir(const std::string &name)
-{
+{ 
+  FileSystem::mkdir(name);
   // might need some path/additional folder to the name
    if (!current)
     throw std::runtime_error("No current directory");
