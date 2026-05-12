@@ -2,16 +2,17 @@
 #define COMMANDPROCESSOR_H_2242509
 
 #include <string>
+#include <map>
+#include <functional>
 #include "FileSystem.h"
 
 // a replacement for int main() loop
-class CommandProcessor
-{
-private:
-    FileSystem fs;
-
+class CommandProcessor {
 public:
-    void run(); // runs loop, calls processCommand()
     void processCommand(const std::string &input);
+    CommandProcessor();
+private:
+    std::map<std::string, std::function<void(std::stringstream&)>> commands;
+    FileSystem fs;
 };
 #endif
