@@ -9,8 +9,8 @@
 class FileSystemVirtual : public FileSystem
 {
 private:
-    std::shared_ptr<Directory> root;
-    std::shared_ptr<Directory> current;
+    //std::shared_ptr<Directory> root;
+    std::shared_ptr<Directory> currentVirtual;
 
 public:
     FileSystemVirtual();

@@ -1,5 +1,4 @@
 #include <fstream>
-#include <filesystem>
 #include "include/FileSystem.h"
 
 FileSystem::FileSystem()
@@ -9,30 +8,31 @@ FileSystem::FileSystem()
 
 void FileSystem::mkdir(const std::string &name)
 {
-  if (!current)
-    throw std::runtime_error("No current directory");
-  if (current->contains(name))
-        throw std::runtime_error("Directory or file already exists");
-  std::shared_ptr<Directory> newDir = std::make_shared<Directory>(name);
-  current->addItem(newDir);
+  std::filesystem::path full = currentPhysical / name;
+  std::filesystem::create_directories(full);
 }
 
 void FileSystem::touch(const std::string &name)
 {
-  if (!current)
-    throw std::runtime_error("No current directory");
-
-  if (current->contains(name))
-    throw std::runtime_error("File already exists");
-
-  std::shared_ptr<File> file = std::make_shared<File>(name);
-  current->addItem(file);
+  std::filesystem::path full = currentPhysical / name;
+  std::ofstream file(full);
 }
 
 void FileSystem::ls() const
 {
-  if (!current)
-    throw std::runtime_error("No current directory");
+  for (const auto &entry : std::filesystem::recursive_directory_iterator(currentPhysical))
+  {
+    std::cout << entry.path().string() << "\n";
+  }
+}
 
-  current->listItems();
+void FileSystem::cd(const std::string &name)
+{
+    std::filesystem::path target = currentPhysical / name;
+
+    if (std::filesystem::exists(target) &&
+        std::filesystem::is_directory(target))
+    {
+        currentPhysical = std::filesystem::canonical(target);
+    }
 }
