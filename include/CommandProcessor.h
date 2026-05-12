@@ -8,11 +8,11 @@
 
 // a replacement for int main() loop
 class CommandProcessor {
-public:
-    void processCommand(const std::string &input);
-    CommandProcessor();
 private:
     std::map<std::string, std::function<void(std::stringstream&)>> commands;
     FileSystem fs;
+public:
+    CommandProcessor();
+    void processCommand(const std::string &input);
 };
 #endif

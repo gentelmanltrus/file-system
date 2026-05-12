@@ -7,8 +7,6 @@
 
 class File : public FileSystemItem
 {
-private:
-
 public:
     File(const std::string &name);
     void display() const override;

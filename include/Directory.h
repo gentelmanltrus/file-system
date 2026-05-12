@@ -13,10 +13,9 @@ private:
 
 public:
     Directory(const std::string &name);
-    bool contains(const std::string &name);
-
-    void addItem(std::shared_ptr<FileSystemItem> item);
     void display() const override;
+    bool contains(const std::string &name);
+    void addItem(std::shared_ptr<FileSystemItem> item);
     void listItems() const;
 };
 #endif // DIRECTORY_H_786402

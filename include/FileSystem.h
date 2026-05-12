@@ -9,7 +9,7 @@
 class FileSystem
 {
 protected:
-std::filesystem::path currentPhysical; 
+    std::filesystem::path currentPhysical; 
 
 public:
     FileSystem(); // initialize currentPhysical as root 
