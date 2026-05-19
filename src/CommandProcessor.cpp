@@ -25,6 +25,11 @@ CommandProcessor::CommandProcessor()
 
         fs.mkdir(dir);
     };
+
+    commands["quit"] = [this](std::stringstream&)
+    {
+        fs.quit();
+    };
 }
 
 void CommandProcessor::processCommand(const std::string &input)

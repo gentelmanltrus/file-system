@@ -3,7 +3,7 @@
 
 FileSystem::FileSystem()
 {
-  // must be defined
+  currentPhysical = getHomeDirectory();
 }
 
  FileSystemItem::~FileSystemItem() {}
@@ -22,7 +22,7 @@ void FileSystem::touch(const std::string &name)
 
 void FileSystem::ls() const
 {
-  for (const auto &entry : std::filesystem::recursive_directory_iterator(currentPhysical))
+  for (const auto &entry : std::filesystem::directory_iterator(currentPhysical))
   {
     std::cout << entry.path().string() << "\n";
   }
@@ -32,9 +32,33 @@ void FileSystem::cd(const std::string &name)
 {
     std::filesystem::path target = currentPhysical / name;
 
-    if (std::filesystem::exists(target) &&
-        std::filesystem::is_directory(target))
+    if (std::filesystem::is_directory(target))
     {
         currentPhysical = std::filesystem::canonical(target);
     }
+}
+
+void FileSystem::quit()
+{
+  std::cout << "Exiting..." << std::endl;
+  exit(0);
+}
+
+#include <cstdlib>
+#include <filesystem>
+
+std::filesystem::path FileSystem::getHomeDirectory()
+{
+#ifdef _WIN32
+    const char* home = std::getenv("USERPROFILE");
+#else
+    const char* home = std::getenv("HOME");
+#endif
+
+    if (home)
+    {
+        return std::filesystem::path(home);
+    }
+
+    return std::filesystem::current_path();
 }

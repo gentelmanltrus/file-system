@@ -18,5 +18,7 @@ public:
     virtual void touch(const std::string &name);
     virtual void ls() const;
     virtual void cd(const std::string &name);
+    virtual void quit();
+    static std::filesystem::path getHomeDirectory();
 };
 #endif // FILESYSTEM_H_28539235
