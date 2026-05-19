@@ -1,8 +1,8 @@
 #include <fstream>
 #include <filesystem>
-#include "include/FileSystemVirtual.h"
-#include "include/File.h"
-#include "include/Directory.h"
+#include "../include/FileSystemVirtual.h"
+#include "../include/File.h"
+#include "../include/Directory.h"
 
 FileSystemVirtual::FileSystemVirtual()
 {

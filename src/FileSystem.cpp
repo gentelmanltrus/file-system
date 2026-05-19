@@ -1,10 +1,12 @@
 #include <fstream>
-#include "include/FileSystem.h"
+#include "../include/FileSystem.h"
 
 FileSystem::FileSystem()
 {
   // must be defined
 }
+
+ FileSystemItem::~FileSystemItem() {}
 
 void FileSystem::mkdir(const std::string &name)
 {

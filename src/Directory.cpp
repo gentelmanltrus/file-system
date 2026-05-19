@@ -1,5 +1,5 @@
 #include <algorithm>
-#include "Directory.h"
+#include "../include/Directory.h"
 
 Directory::Directory(const std::string &name)
     : FileSystemItem(name) {}

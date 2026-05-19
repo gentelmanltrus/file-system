@@ -1,4 +1,4 @@
-#include "include/FileSystemItem.h"
+#include "../include/FileSystemItem.h"
 
 FileSystemItem::FileSystemItem(const std::string &name)
     : name(name) {}

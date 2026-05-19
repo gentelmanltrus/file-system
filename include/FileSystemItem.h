@@ -9,11 +9,11 @@ protected:
 
 public:
     FileSystemItem(const std::string& name);
+    virtual ~FileSystemItem(); // must be defined to delete objects through base pointer
 
     std::string getName() const;
 
     // Polymorphism in real time
     virtual void display() const = 0;
-    virtual ~FileSystemItem(); // must be defined to delete objects through base pointer
 };
 #endif // FILESYSTEMITEM_H_956230
