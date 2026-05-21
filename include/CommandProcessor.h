@@ -14,5 +14,6 @@ private:
 public:
     CommandProcessor();
     void processCommand(const std::string &input);
+    void help() const;
 };
 #endif

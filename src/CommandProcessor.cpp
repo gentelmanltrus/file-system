@@ -30,6 +30,10 @@ CommandProcessor::CommandProcessor()
     {
         fs.quit();
     };
+    commands["help"] = [this](std::stringstream&)
+    {
+        help();
+    };
 }
 
 void CommandProcessor::processCommand(const std::string &input)

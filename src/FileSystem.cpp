@@ -43,6 +43,15 @@ void FileSystem::quit()
   std::cout << "Exiting..." << std::endl;
   exit(0);
 }
+/*void Filesystem::help() const
+{
+    std::cout << "Available commands:\n";
+    std::cout << "touch <filename>\n";
+    std::cout << "ls\n";
+    std::cout << "mkdir <directory>\n";
+    std::cout << "quit\n";
+    std::cout << "help\n";
+}*/
 
 #include <cstdlib>
 #include <filesystem>
