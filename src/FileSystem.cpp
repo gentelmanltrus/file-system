@@ -1,9 +1,11 @@
 #include <fstream>
 #include "../include/FileSystem.h"
-
+#include <cstdlib>
+#include <filesystem>
 FileSystem::FileSystem()
 {
   currentPhysical = getHomeDirectory();
+  help();
 }
 
  FileSystemItem::~FileSystemItem() {}
@@ -43,9 +45,15 @@ void FileSystem::quit()
   std::cout << "Exiting..." << std::endl;
   exit(0);
 }
-
-#include <cstdlib>
-#include <filesystem>
+void FileSystem::help() const
+{
+    std::cout << "Available commands:\n";
+    std::cout << "touch <filename>\n";
+    std::cout << "ls\n";
+    std::cout << "mkdir <directory>\n";
+    std::cout << "quit\n";
+    std::cout << "help\n";
+}
 
 std::filesystem::path FileSystem::getHomeDirectory()
 {

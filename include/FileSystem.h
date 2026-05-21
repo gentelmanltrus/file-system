@@ -19,6 +19,7 @@ public:
     virtual void ls() const;
     virtual void cd(const std::string &name);
     virtual void quit();
+    virtual void help() const;
     static std::filesystem::path getHomeDirectory();
 };
 #endif // FILESYSTEM_H_28539235
