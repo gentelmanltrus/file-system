@@ -42,6 +42,10 @@ CommandProcessor::CommandProcessor()
 
         fs.cd(dir);
     };
+    commands["pwd"] = [this](std::stringstream&)
+    {
+    fs.pwd();
+    };
 }
 
 void CommandProcessor::processCommand(const std::string &input)

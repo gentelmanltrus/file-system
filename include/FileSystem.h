@@ -20,6 +20,7 @@ public:
     virtual void cd(const std::string &name);
     virtual void quit();
     virtual void help() const;
+    virtual void pwd() const;
     static std::filesystem::path getHomeDirectory();
 };
 #endif // FILESYSTEM_H_28539235
