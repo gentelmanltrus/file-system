@@ -15,7 +15,7 @@ CommandProcessor::CommandProcessor()
     commands["ls"] = [this](std::stringstream&)
     {
         fs.ls();
-    };
+    };    
 
     commands["mkdir"] = [this](std::stringstream& ss)
     {
@@ -41,6 +41,10 @@ CommandProcessor::CommandProcessor()
             throw std::runtime_error("cd: missing directory");
 
         fs.cd(dir);
+    };
+    commands["pwd"] = [this](std::stringstream&)
+    {
+    fs.pwd();
     };
 }
 

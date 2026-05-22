@@ -51,8 +51,14 @@ void FileSystem::help() const
     std::cout << "touch <filename>\n";
     std::cout << "ls\n";
     std::cout << "mkdir <directory>\n";
+    std::cout << "cd\n";
+    std::cout << "pwd\n";
     std::cout << "quit\n";
     std::cout << "help\n";
+}
+void FileSystem::pwd() const
+{
+    std::cout << currentPhysical  << std::endl;
 }
 
 std::filesystem::path FileSystem::getHomeDirectory()
