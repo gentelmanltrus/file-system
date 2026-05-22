@@ -34,6 +34,14 @@ CommandProcessor::CommandProcessor()
     {
         help();
     };
+    commands ["cd"] = [this](std::stringstream& ss)
+    {
+        std::string dir;
+        if (!(ss >> dir))
+            throw std::runtime_error("cd: missing directory");
+
+        fs.cd(dir);
+    };
 }
 
 void CommandProcessor::processCommand(const std::string &input)
