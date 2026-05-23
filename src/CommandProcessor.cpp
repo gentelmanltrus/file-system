@@ -9,12 +9,12 @@ CommandProcessor::CommandProcessor()
         if (!(ss >> fileName))
             throw std::runtime_error("touch: missing filename");
 
-        fs.touch(fileName);
+        fileSystem.touch(fileName);
     };
 
     commands["ls"] = [this](std::stringstream&)
     {
-        fs.ls();
+        fileSystem.ls();
     };    
 
     commands["mkdir"] = [this](std::stringstream& ss)
@@ -23,16 +23,12 @@ CommandProcessor::CommandProcessor()
         if (!(ss >> dir))
             throw std::runtime_error("mkdir: missing directory");
 
-        fs.mkdir(dir);
+        fileSystem.mkdir(dir);
     };
 
-    commands["quit"] = [this](std::stringstream&)
-    {
-        fs.quit();
-    };
     commands["help"] = [this](std::stringstream&)
     {
-        help();
+        fileSystem.help();
     };
     commands ["cd"] = [this](std::stringstream& ss)
     {
@@ -40,11 +36,11 @@ CommandProcessor::CommandProcessor()
         if (!(ss >> dir))
             throw std::runtime_error("cd: missing directory");
 
-        fs.cd(dir);
+        fileSystem.cd(dir);
     };
     commands["pwd"] = [this](std::stringstream&)
     {
-    fs.pwd();
+    fileSystem.pwd();
     };
 }
 
@@ -70,6 +66,6 @@ void CommandProcessor::processCommand(const std::string &input)
     }
     else
     {
-        throw std::runtime_error("Invalid command: " + commandName);
+        throw std::runtime_error("Invalid command: " + commandName + "\n");
     }
 }

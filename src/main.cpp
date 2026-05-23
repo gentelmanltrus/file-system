@@ -10,8 +10,10 @@ int main()
   {
     std::cout << ">";
     std::getline(std::cin, input);
-    if (input == "end")
+    if (input == "quit")
       break;
+    if (input == "")
+      continue;
 
     try
     {
