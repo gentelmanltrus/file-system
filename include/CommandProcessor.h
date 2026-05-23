@@ -10,7 +10,7 @@
 class CommandProcessor {
 private:
     std::map<std::string, std::function<void(std::stringstream&)>> commands;
-    FileSystem fs;
+    FileSystem fileSystem;
 public:
     CommandProcessor();
     void processCommand(const std::string &input);

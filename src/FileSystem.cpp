@@ -38,6 +38,10 @@ void FileSystem::cd(const std::string &name)
     {
         currentPhysical = std::filesystem::canonical(target);
     }
+    else
+    {
+      std::cout << "Directory does not exist" << std::endl;
+    }
 }
 
 void FileSystem::quit()
