@@ -1,6 +1,6 @@
 #include <iostream>
 #include "../include/CommandProcessor.h"
-
+#include <sstream>
 CommandProcessor::CommandProcessor()
 {
     commands["touch"] = [this](std::stringstream& ss)

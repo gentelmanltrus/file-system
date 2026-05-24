@@ -1,6 +1,8 @@
 #include <algorithm>
 #include "../include/Directory.h"
-
+#include <vector>
+#include <memory>
+#include <iostream>
 Directory::Directory(const std::string &name)
     : FileSystemItem(name) {}
 
