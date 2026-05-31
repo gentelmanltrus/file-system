@@ -42,6 +42,32 @@ CommandProcessor::CommandProcessor()
     {
     fileSystem.pwd();
     };
+    commands["rm"] = [this](std::stringstream& ss)
+    {
+        std::string flag;
+        std::string name;
+
+        if (!(ss >> flag))
+            throw std::runtime_error("rm: missing filename");
+
+        if (flag == "-f")
+        {
+            if (!(ss >> name))
+                throw std::runtime_error("rm: missing filename after -f");
+            fileSystem.remove(name);
+        }
+        else
+        {
+            name = flag;
+            std::cout << "Are you sure you want to remove \"" << name << "\"? Type \"y\" to confirm:" << std::endl;
+            std::string answer;
+            std::getline(std::cin, answer);
+            if (answer == "y" || answer == "Y")
+                fileSystem.remove(name);
+            else
+                std::cout << "rm: cancelled" << std::endl;
+        }
+    };
 }
 
 void CommandProcessor::run()

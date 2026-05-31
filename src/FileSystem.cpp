@@ -50,6 +50,18 @@ void FileSystem::quit()
   exit(0);
 }
 
+void FileSystem::remove(const std::string &name)
+{
+    std::filesystem::path full = currentPhysical / name;
+    if (!std::filesystem::exists(full))
+    {
+        std::cout << "rm: \"" << name << "\": no such file or directory" << std::endl;
+        return;
+    }
+    std::filesystem::remove_all(full);
+    std::cout << "\"" << name << "\" removed" << std::endl;
+}
+
 void FileSystem::help() const
 {
     std::cout << "Available commands:" << std::endl;
@@ -58,6 +70,8 @@ void FileSystem::help() const
     std::cout << "mkdir <directory>" << std::endl;
     std::cout << "cd" << std::endl;
     std::cout << "pwd" << std::endl;
+    std::cout << "rm <name>" << std::endl;
+    std::cout << "rm -f <name>" << std::endl;
     std::cout << "quit" << std::endl;
     std::cout << "help" << std::endl;
 }

@@ -9,16 +9,17 @@
 class FileSystem
 {
 protected:
-    std::filesystem::path currentPhysical; 
+    std::filesystem::path currentPhysical;
 
 public:
-    FileSystem(); // initialize currentPhysical as root 
+    FileSystem(); // initialize currentPhysical as root
 
     virtual void mkdir(const std::string &name);
     virtual void touch(const std::string &name);
     virtual void ls() const;
     virtual void cd(const std::string &name);
     virtual void quit();
+    virtual void remove(const std::string &name);
     virtual void help() const;
     virtual void pwd() const;
     static std::filesystem::path getHomeDirectory();
