@@ -26,7 +26,7 @@ void FileSystem::ls() const
 {
   for (const auto &entry : std::filesystem::directory_iterator(currentPhysical))
   {
-    std::cout << entry.path().string() << "\n";
+    std::cout << entry.path().string() << std::endl;
   }
 }
 
@@ -51,14 +51,14 @@ void FileSystem::quit()
 }
 void FileSystem::help() const
 {
-    std::cout << "Available commands:\n";
-    std::cout << "touch <filename>\n";
-    std::cout << "ls\n";
-    std::cout << "mkdir <directory>\n";
-    std::cout << "cd\n";
-    std::cout << "pwd\n";
-    std::cout << "quit\n";
-    std::cout << "help\n";
+    std::cout << "Available commands:" << std::endl;
+    std::cout << "touch <filename>" << std::endl;
+    std::cout << "ls" << std::endl;
+    std::cout << "mkdir <directory>" << std::endl;
+    std::cout << "cd" << std::endl;
+    std::cout << "pwd" << std::endl;
+    std::cout << "quit" << std::endl;
+    std::cout << "help" << std::endl;
 }
 void FileSystem::pwd() const
 {

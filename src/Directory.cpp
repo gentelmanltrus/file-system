@@ -22,7 +22,7 @@ void Directory::addItem(std::shared_ptr<FileSystemItem> item)
 
 void Directory::display() const
 {
-    std::cout << "DIR: " << name << "\n";
+    std::cout << "DIR: " << name << std::endl;
 }
 
 void Directory::listItems() const
