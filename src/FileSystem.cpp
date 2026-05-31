@@ -8,7 +8,7 @@ FileSystem::FileSystem()
   help();
 }
 
- FileSystemItem::~FileSystemItem() {}
+FileSystemItem::~FileSystemItem() {}
 
 void FileSystem::mkdir(const std::string &name)
 {
@@ -49,6 +49,7 @@ void FileSystem::quit()
   std::cout << "Exiting..." << std::endl;
   exit(0);
 }
+
 void FileSystem::help() const
 {
     std::cout << "Available commands:" << std::endl;
@@ -60,6 +61,7 @@ void FileSystem::help() const
     std::cout << "quit" << std::endl;
     std::cout << "help" << std::endl;
 }
+
 void FileSystem::pwd() const
 {
     std::cout << currentPhysical  << std::endl;

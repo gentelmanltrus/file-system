@@ -5,25 +5,7 @@ int main()
 {
 
   CommandProcessor cmd;
-  std::string input;
-  while (true)
-  {
-    std::cout << ">";
-    std::getline(std::cin, input);
-    if (input == "quit")
-      break;
-    if (input == "")
-      continue;
-
-    try
-    {
-      cmd.processCommand(input);
-    }
-    catch (std::runtime_error &e)
-    {
-      std::cout << e.what();
-    }
-  }
+  cmd.run();
 
   return 0;
 }

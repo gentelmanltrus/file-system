@@ -13,7 +13,7 @@ private:
     FileSystem fileSystem;
 public:
     CommandProcessor();
+    void run();
     void processCommand(const std::string &input);
-    void help() const;
 };
 #endif

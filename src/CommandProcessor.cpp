@@ -15,7 +15,7 @@ CommandProcessor::CommandProcessor()
     commands["ls"] = [this](std::stringstream&)
     {
         fileSystem.ls();
-    };    
+    };
 
     commands["mkdir"] = [this](std::stringstream& ss)
     {
@@ -44,6 +44,29 @@ CommandProcessor::CommandProcessor()
     };
 }
 
+void CommandProcessor::run()
+{
+    std::string input;
+    while (true)
+    {
+    std::cout << ">";
+    std::getline(std::cin, input);
+    if (input == "quit")
+        break;
+    if (input == "")
+        continue;
+
+    try
+    {
+        processCommand(input);
+    }
+    catch (std::runtime_error &e)
+    {
+        std::cout << e.what();
+    }
+    }
+}
+
 void CommandProcessor::processCommand(const std::string &input)
 {
     std::stringstream ss(input);
@@ -54,15 +77,15 @@ void CommandProcessor::processCommand(const std::string &input)
     auto it = commands.find(commandName);
     if (it != commands.end())
     {
-      try 
-      {
-        it->second(ss);
-      } 
-      catch(std::runtime_error &e)
-      {
-        std::cout << e.what() << std::endl;
-        return;
-      }
+        try
+        {
+            it->second(ss);
+        }
+        catch(std::runtime_error &e)
+        {
+            std::cout << e.what() << std::endl;
+            return;
+        }
     }
     else
     {

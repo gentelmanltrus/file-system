@@ -10,13 +10,13 @@ FileSystemVirtual::FileSystemVirtual()
 }
 
 void FileSystemVirtual::mkdir(const std::string &name)
-{ 
+{
   FileSystem::mkdir(name);
   // might need some path/additional folder to the name
-   if (!currentPathVirtual)
+  if (!currentPathVirtual)
     throw std::runtime_error("No current directory");
   if (currentPathVirtual->contains(name))
-        throw std::runtime_error("Directory or file already exists");
+    throw std::runtime_error("Directory or file already exists");
   std::shared_ptr<Directory> newDir = std::make_shared<Directory>(name);
   currentPathVirtual->addItem(newDir);
 
@@ -27,7 +27,7 @@ void FileSystemVirtual::touch(const std::string &name)
 {
   // might need some path/additional folder to the nmae
   FileSystem::touch(name);
-  
+
   if (!currentPathVirtual)
     throw std::runtime_error("No current directory");
 
