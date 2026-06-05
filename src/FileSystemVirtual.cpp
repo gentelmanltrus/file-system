@@ -6,7 +6,36 @@
 
 FileSystemVirtual::FileSystemVirtual()
 {
-  // must be defined
+  currentPathVirtual = std::make_shared<Directory>("root");
+}
+
+void FileSystemVirtual::import(const std::filesystem::path& path)
+{
+    if (!currentPathVirtual)
+        throw std::runtime_error("import: no current virtual directory");
+
+    if (std::filesystem::is_regular_file(path))
+    {
+        std::shared_ptr<File> file = std::make_shared<File>(path);
+        currentPathVirtual->addItem(file);
+    }
+    else if (std::filesystem::is_directory(path))
+    {
+        std::shared_ptr<Directory> dir = std::make_shared<Directory>(path);
+        currentPathVirtual->addItem(dir);
+
+        auto saved = currentPathVirtual;
+        currentPathVirtual = dir;
+        for (const auto& entry : std::filesystem::directory_iterator(path))
+        {
+            import(entry.path());
+        }
+        currentPathVirtual = saved;
+    }
+    else
+    {
+        throw std::runtime_error("import: path does not exist");
+    }
 }
 
 void FileSystemVirtual::mkdir(const std::string &name)
