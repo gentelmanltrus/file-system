@@ -80,6 +80,111 @@ void FileSystem::pwd() const
 {
     std::cout << currentPhysical  << std::endl;
 }
+void FileSystem::tree() const
+{
+    if (!std::filesystem::exists(currentPhysical) || !std::filesystem::is_directory(currentPhysical)) {
+        std::cout << "Klaida: Kelias neegzistuoja\n";
+        return;
+    }
+
+    std::cout << currentPhysical.filename().string() << "\n";
+    
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(currentPhysical)) {
+        auto depth = entry.depth();
+        
+      
+        for (int i = 0; i < depth; ++i) {
+            std::cout << "  ";
+        }
+        
+        if (entry.is_directory()) {
+            std::cout << "└── [" << entry.path().filename().string() << "]\n";
+        } else {
+            std::cout << "└── " << entry.path().filename().string() << "\n";
+        }
+    }
+}
+void FileSystem::duplicates() const
+{
+    if (!std::filesystem::exists(currentPhysical)) return;
+
+    //hash file papildpma f-ja
+    auto calculateHash = [](const std::filesystem::path& filePath) -> std::size_t {
+        std::ifstream file(filePath, std::ios::binary);
+        if (!file) return 0;
+        std::size_t hash = 0;
+        char buffer[1024];
+        while (file.read(buffer, sizeof(buffer))) {
+            for (std::streamsize i = 0; i < file.gcount(); ++i) {
+                hash = hash * 31 + buffer[i];
+            }
+        }
+        return hash + std::filesystem::file_size(filePath);
+    };
+
+    std::map<std::size_t, std::vector<std::filesystem::path>> hashGroups;
+
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(currentPhysical)) {
+        if (entry.is_regular_file()) {
+            std::size_t fileHash = calculateHash(entry.path());
+            hashGroups[fileHash].push_back(entry.path());
+        }
+    }
+
+    std::cout << "\n------ DUPLIKATU PAIESKA ------\n";
+    bool found = false;
+
+    for (const auto& [hash, files] : hashGroups) {
+        if (files.size() > 1) {
+            found = true;
+            std::cout << "Rasti duplikatai (Viso: " << files.size() << " failai):\n";
+            for (const auto& path : files) {
+                std::cout << "  -> " << std::filesystem::relative(path, currentPhysical).string() << "\n";
+            }
+        }
+    }
+
+    if (!found) {
+        std::cout << "Vienodu failu nerasta.\n";
+    }
+}
+void FileSystem::report() const
+{
+    if (!std::filesystem::exists(currentPhysical)) return;
+
+    struct FileInfo {
+        int count = 0;
+        std::uintmax_t maxSize = 0;
+        std::filesystem::path largestFilePath;
+    };
+
+    std::map<std::string, FileInfo> reportMap;
+
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(currentPhysical)) {
+        if (entry.is_regular_file()) {
+            std::string ext = entry.path().extension().string();
+            if (ext.empty()) ext = "(No extension)";
+
+            auto size = entry.file_size();
+            auto& info = reportMap[ext];
+            
+            info.count++;
+            if (size > info.maxSize) {
+                info.maxSize = size;
+                info.largestFilePath = entry.path();
+            }
+        }
+    }
+
+    std::cout << "\n FAILU ATASKAITA \n";
+    for (const auto& [ext, info] : reportMap) {
+        std::cout << "Tipas: " << ext << " | Kiekis: " << info.count << "\n";
+        if (info.count > 0) {
+            std::cout << "  Didziausias failas: " << info.largestFilePath.filename().string() 
+                      << " (" << info.maxSize << " bytes)\n";
+        }
+    }
+}
 
 std::filesystem::path FileSystem::getHomeDirectory()
 {
