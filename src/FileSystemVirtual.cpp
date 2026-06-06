@@ -26,9 +26,17 @@ void FileSystemVirtual::import(const std::filesystem::path& path)
 
         auto saved = currentPathVirtual;
         currentPathVirtual = dir;
-        for (const auto& entry : std::filesystem::directory_iterator(path))
+        try
         {
-            import(entry.path());
+            for (const auto& entry : std::filesystem::directory_iterator(path))
+            {
+                import(entry.path());
+            }
+        }
+        catch (...)
+        {
+            currentPathVirtual = saved;
+            throw;
         }
         currentPathVirtual = saved;
     }
