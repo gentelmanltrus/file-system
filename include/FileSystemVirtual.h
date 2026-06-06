@@ -15,6 +15,7 @@ private:
 public:
     FileSystemVirtual();
 
+    void import(const std::filesystem::path& path);
     void mkdir(const std::string &name) override;
     void touch(const std::string &name) override;
     void ls() const override;

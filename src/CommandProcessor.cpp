@@ -26,6 +26,15 @@ CommandProcessor::CommandProcessor()
         fileSystem.mkdir(dir);
     };
 
+    commands["import"] = [this](std::stringstream& ss)
+    {
+        std::filesystem::path path;
+        if (!(ss >> path))
+            throw std::runtime_error("import: missing path");
+
+        fileSystem.import(path);
+    };
+
     commands["help"] = [this](std::stringstream&)
     {
         fileSystem.help();

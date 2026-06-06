@@ -68,6 +68,7 @@ void FileSystem::help() const
     std::cout << "touch <filename>" << std::endl;
     std::cout << "ls" << std::endl;
     std::cout << "mkdir <directory>" << std::endl;
+    std::cout << "import <path>" << std::endl;
     std::cout << "cd" << std::endl;
     std::cout << "pwd" << std::endl;
     std::cout << "rm <name>" << std::endl;

@@ -5,12 +5,13 @@
 #include <map>
 #include <functional>
 #include "FileSystem.h"
+#include "FileSystemVirtual.h"
 
 // a replacement for int main() loop
 class CommandProcessor {
 private:
     std::map<std::string, std::function<void(std::stringstream&)>> commands;
-    FileSystem fileSystem;
+    FileSystemVirtual fileSystem;
 public:
     CommandProcessor();
     void run();
