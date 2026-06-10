@@ -1,7 +1,11 @@
 #include <fstream>
 #include "../include/FileSystem.h"
-#include <cstdlib>
 #include <filesystem>
+#include <iostream>
+#include <map>
+#include <unordered_map>
+#include <vector>
+#include <cstdint>
 FileSystem::FileSystem()
 {
   currentPhysical = getHomeDirectory();
@@ -83,7 +87,7 @@ void FileSystem::pwd() const
 void FileSystem::tree() const
 {
     if (!std::filesystem::exists(currentPhysical) || !std::filesystem::is_directory(currentPhysical)) {
-        std::cout << "Klaida: Kelias neegzistuoja\n";
+        std::cout << "Error: path is not found\n";
         return;
     }
 
@@ -108,44 +112,67 @@ void FileSystem::duplicates() const
 {
     if (!std::filesystem::exists(currentPhysical)) return;
 
-    //hash file papildpma f-ja
-    auto calculateHash = [](const std::filesystem::path& filePath) -> std::size_t {
-        std::ifstream file(filePath, std::ios::binary);
-        if (!file) return 0;
-        std::size_t hash = 0;
-        char buffer[1024];
-        while (file.read(buffer, sizeof(buffer))) {
-            for (std::streamsize i = 0; i < file.gcount(); ++i) {
-                hash = hash * 31 + buffer[i];
-            }
-        }
-        return hash + std::filesystem::file_size(filePath);
+    namespace fs = std::filesystem;
+
+    auto fileSizeOf = [](const fs::path& p) -> std::uintmax_t {
+        std::error_code ec;
+        auto size = fs::file_size(p, ec);
+        return ec ? static_cast<std::uintmax_t>(-1) : size;
     };
 
-    std::map<std::size_t, std::vector<std::filesystem::path>> hashGroups;
+    auto calculateHash = [](const fs::path& filePath) -> std::size_t {
+        std::ifstream file(filePath, std::ios::binary);
+        if (!file) return 0;
 
-    for (const auto& entry : std::filesystem::recursive_directory_iterator(currentPhysical)) {
+        std::size_t hash = 1469598103934665603ULL; // FNV offset basis
+        const std::size_t prime = 1099511628211ULL;
+        char buffer[4096];
+
+        while (file.read(buffer, sizeof(buffer)) || file.gcount() > 0) {
+            for (std::streamsize i = 0; i < file.gcount(); ++i) {
+                hash ^= static_cast<unsigned char>(buffer[i]);
+                hash *= prime;
+            }
+        }
+        return hash;
+    };
+
+    std::map<std::uintmax_t, std::vector<fs::path>> sizeGroups;
+
+    for (const auto& entry : fs::recursive_directory_iterator(currentPhysical)) {
         if (entry.is_regular_file()) {
-            std::size_t fileHash = calculateHash(entry.path());
-            hashGroups[fileHash].push_back(entry.path());
+            auto size = fileSizeOf(entry.path());
+            if (size != static_cast<std::uintmax_t>(-1)) {
+                sizeGroups[size].push_back(entry.path());
+            }
         }
     }
 
-    std::cout << "\n------ DUPLIKATU PAIESKA ------\n";
+    std::cout << "\n------ Duplicate Search ------\n";
     bool found = false;
 
-    for (const auto& [hash, files] : hashGroups) {
-        if (files.size() > 1) {
-            found = true;
-            std::cout << "Rasti duplikatai (Viso: " << files.size() << " failai):\n";
-            for (const auto& path : files) {
-                std::cout << "  -> " << std::filesystem::relative(path, currentPhysical).string() << "\n";
+    for (const auto& [size, files] : sizeGroups) {
+        if (files.size() < 2) continue;
+
+        std::unordered_map<std::size_t, std::vector<fs::path>> hashGroups;
+
+        for (const auto& path : files) {
+            hashGroups[calculateHash(path)].push_back(path);
+        }
+
+        for (const auto& [hash, dupFiles] : hashGroups) {
+            if (dupFiles.size() > 1) {
+                found = true;
+                std::cout << "Duplicates found (size: " << size << ", count: " << dupFiles.size() << "):\n";
+                for (const auto& path : dupFiles) {
+                    std::cout << "  -> " << fs::relative(path, currentPhysical).string() << "\n";
+                }
             }
         }
     }
 
     if (!found) {
-        std::cout << "Vienodu failu nerasta.\n";
+        std::cout << "Duplicates were not found.\n";
     }
 }
 void FileSystem::report() const
@@ -176,11 +203,11 @@ void FileSystem::report() const
         }
     }
 
-    std::cout << "\n FAILU ATASKAITA \n";
+    std::cout << "\n Files \n";
     for (const auto& [ext, info] : reportMap) {
-        std::cout << "Tipas: " << ext << " | Kiekis: " << info.count << "\n";
+        std::cout << "Type: " << ext << " Amount: " << info.count << "\n";
         if (info.count > 0) {
-            std::cout << "  Didziausias failas: " << info.largestFilePath.filename().string() 
+            std::cout << "  Biggest file: " << info.largestFilePath.filename().string() 
                       << " (" << info.maxSize << " bytes)\n";
         }
     }
