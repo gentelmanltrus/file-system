@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 #include <iostream>
-Directory::Directory(const std::string &name)
+Directory::Directory(const std::filesystem::path &name)
     : FileSystemItem(name) {}
 
 bool Directory::contains(const std::string &name)
@@ -22,7 +22,7 @@ void Directory::addItem(std::shared_ptr<FileSystemItem> item)
 
 void Directory::display() const
 {
-    std::cout << "DIR: " << name << std::endl;
+    std::cout << "DIR: " << name.string() << std::endl;
 }
 
 void Directory::listItems() const

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <memory>
 #include <functional>
 #include "FileSystem.h"
 #include "FileSystemVirtual.h"
@@ -11,7 +12,8 @@
 class CommandProcessor {
 private:
     std::map<std::string, std::function<void(std::stringstream&)>> commands;
-    FileSystemVirtual fileSystem;
+    std::map<std::string, std::unique_ptr<FileSystem>> fileSystems;
+    std::map<std::string, std::unique_ptr<FileSystem>>::iterator currentFileSystem;
 public:
     CommandProcessor();
     void run();

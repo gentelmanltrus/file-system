@@ -9,7 +9,7 @@ FileSystemVirtual::FileSystemVirtual()
   currentPathVirtual = std::make_shared<Directory>("root");
 }
 
-void FileSystemVirtual::import(const std::filesystem::path& path)
+void FileSystemVirtual::import(const std::filesystem::path &path)
 {
     if (!currentPathVirtual)
         throw std::runtime_error("import: no current virtual directory");

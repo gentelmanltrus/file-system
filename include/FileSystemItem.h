@@ -12,7 +12,7 @@ public:
     FileSystemItem(const std::filesystem::path& name);
     virtual ~FileSystemItem(); // must be defined to delete objects through base pointer
 
-    std::string getName() const;
+    std::filesystem::path getName() const;
 
     // Polymorphism in real time
     virtual void display() const = 0;
