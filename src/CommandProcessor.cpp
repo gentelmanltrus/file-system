@@ -149,6 +149,21 @@ CommandProcessor::CommandProcessor()
                 std::cout << "rm: cancelled" << std::endl;
         }
     };
+  
+    commands["tree"] = [this](std::stringstream&)
+    {
+        fileSystem.tree();
+    };
+
+    commands["report"] = [this](std::stringstream&)
+    {
+        fileSystem.report();
+    };
+
+    commands["duplicates"] = [this](std::stringstream&)
+    {
+        fileSystem.duplicates();
+    };
 
     // initialize with one default file system
     fileSystems["physical"] = std::make_unique<FileSystem>();

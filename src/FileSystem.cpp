@@ -1,7 +1,11 @@
 #include <fstream>
 #include "../include/FileSystem.h"
-#include <cstdlib>
 #include <filesystem>
+#include <iostream>
+#include <map>
+#include <unordered_map>
+#include <vector>
+#include <cstdint>
 FileSystem::FileSystem()
 {
   currentPhysical = getHomeDirectory();
@@ -82,6 +86,134 @@ void FileSystem::help() const
 void FileSystem::pwd() const
 {
     std::cout << currentPhysical.string();
+}
+void FileSystem::tree() const
+{
+    if (!std::filesystem::exists(currentPhysical) || !std::filesystem::is_directory(currentPhysical)) {
+        std::cout << "Error: path is not found\n";
+        return;
+    }
+
+    std::cout << currentPhysical.filename().string() << "\n";
+
+    for (auto it = std::filesystem::recursive_directory_iterator(currentPhysical); it != std::filesystem::recursive_directory_iterator(); ++it) {
+        auto depth = it.depth();
+        const auto &entry = *it;
+
+        for (int i = 0; i < depth; ++i) {
+            std::cout << "  ";
+        }
+
+        if (entry.is_directory()) {
+            std::cout << "└── [" << entry.path().filename().string() << "]\n";
+        } else {
+            std::cout << "└── " << entry.path().filename().string() << "\n";
+        }
+    }
+}
+void FileSystem::duplicates() const
+{
+    if (!std::filesystem::exists(currentPhysical)) return;
+
+    namespace fs = std::filesystem;
+
+    auto fileSizeOf = [](const fs::path& p) -> std::uintmax_t {
+        std::error_code ec;
+        auto size = fs::file_size(p, ec);
+        return ec ? static_cast<std::uintmax_t>(-1) : size;
+    };
+
+    auto calculateHash = [](const fs::path& filePath) -> std::size_t {
+        std::ifstream file(filePath, std::ios::binary);
+        if (!file) return 0;
+
+        std::size_t hash = 1469598103934665603ULL; // FNV offset basis
+        const std::size_t prime = 1099511628211ULL;
+        char buffer[4096];
+
+        while (file.read(buffer, sizeof(buffer)) || file.gcount() > 0) {
+            for (std::streamsize i = 0; i < file.gcount(); ++i) {
+                hash ^= static_cast<unsigned char>(buffer[i]);
+                hash *= prime;
+            }
+        }
+        return hash;
+    };
+
+    std::map<std::uintmax_t, std::vector<fs::path>> sizeGroups;
+
+    for (const auto& entry : fs::recursive_directory_iterator(currentPhysical)) {
+        if (entry.is_regular_file()) {
+            auto size = fileSizeOf(entry.path());
+            if (size != static_cast<std::uintmax_t>(-1)) {
+                sizeGroups[size].push_back(entry.path());
+            }
+        }
+    }
+
+    std::cout << "\n------ Duplicate Search ------\n";
+    bool found = false;
+
+    for (const auto& [size, files] : sizeGroups) {
+        if (files.size() < 2) continue;
+
+        std::unordered_map<std::size_t, std::vector<fs::path>> hashGroups;
+
+        for (const auto& path : files) {
+            hashGroups[calculateHash(path)].push_back(path);
+        }
+
+        for (const auto& [hash, dupFiles] : hashGroups) {
+            if (dupFiles.size() > 1) {
+                found = true;
+                std::cout << "Duplicates found (size: " << size << ", count: " << dupFiles.size() << "):\n";
+                for (const auto& path : dupFiles) {
+                    std::cout << "  -> " << fs::relative(path, currentPhysical).string() << "\n";
+                }
+            }
+        }
+    }
+
+    if (!found) {
+        std::cout << "Duplicates were not found.\n";
+    }
+}
+void FileSystem::report() const
+{
+    if (!std::filesystem::exists(currentPhysical)) return;
+
+    struct FileInfo {
+        int count = 0;
+        std::uintmax_t maxSize = 0;
+        std::filesystem::path largestFilePath;
+    };
+
+    std::map<std::string, FileInfo> reportMap;
+
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(currentPhysical)) {
+        if (entry.is_regular_file()) {
+            std::string ext = entry.path().extension().string();
+            if (ext.empty()) ext = "(No extension)";
+
+            auto size = entry.file_size();
+            auto& info = reportMap[ext];
+            
+            info.count++;
+            if (size > info.maxSize) {
+                info.maxSize = size;
+                info.largestFilePath = entry.path();
+            }
+        }
+    }
+
+    std::cout << "\n Files \n";
+    for (const auto& [ext, info] : reportMap) {
+        std::cout << "Type: " << ext << " Amount: " << info.count << "\n";
+        if (info.count > 0) {
+            std::cout << "  Biggest file: " << info.largestFilePath.filename().string() 
+                      << " (" << info.maxSize << " bytes)\n";
+        }
+    }
 }
 
 std::filesystem::path FileSystem::getHomeDirectory()

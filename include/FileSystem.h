@@ -22,6 +22,9 @@ public:
     virtual void remove(const std::string &name);
     virtual void help() const;
     virtual void pwd() const;
+    void tree() const;
+    void report() const;
+    void duplicates() const;
     static std::filesystem::path getHomeDirectory();
 };
 #endif // FILESYSTEM_H_28539235
