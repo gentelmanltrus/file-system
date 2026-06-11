@@ -3,6 +3,48 @@
 #include <sstream>
 CommandProcessor::CommandProcessor()
 {
+    commands["alias"] = [this](std::stringstream &ss)
+    {
+        std::string existingCommand;
+        std::string newAlias;
+
+        if (!(ss >> existingCommand))
+            throw std::runtime_error("alias: missing command name");
+        if (!(ss >> newAlias))
+            throw std::runtime_error("alias: missing new alias");
+
+        auto itCommands1 = commands.find(existingCommand);
+        if (itCommands1 == commands.end())
+            throw std::runtime_error("alias: command does not exist");
+        for (const auto& pair : aliases)
+        {
+            if (pair.second == existingCommand)
+                throw std::runtime_error("alias: command already has an alias");
+        }
+
+        auto itCommands2 = commands.find(newAlias);
+        if (itCommands2 != commands.end())
+            throw std::runtime_error("alias: alias cannot be named after another command");
+        auto itAliases = aliases.find(newAlias);
+        if (itAliases != aliases.end())
+            throw std::runtime_error("alias: alias already exists");
+
+        aliases[newAlias] = existingCommand;
+    };
+
+    commands["unalias"] = [this](std::stringstream &ss)
+    {
+        std::string name;
+        if (!(ss >> name))
+            throw std::runtime_error("unalias: missing alias name");
+
+        auto itAliases = aliases.find(name);
+        if (itAliases == aliases.end())
+            throw std::runtime_error("unalias: alias does not exist");
+
+        aliases.erase(name);
+    };
+
     commands["touch"] = [this](std::stringstream &ss)
     {
         std::string fileName;
@@ -39,7 +81,7 @@ CommandProcessor::CommandProcessor()
         if (ss >> path)
         {
             // return base class raw pointer from unique_ptr without ownership transfer
-            FileSystem *fsVirtual = currentFileSystem->second.get(); 
+            FileSystem *fsVirtual = currentFileSystem->second.get();
             dynamic_cast<FileSystemVirtual *>(fsVirtual)->import(path);
         }
     };
@@ -145,6 +187,10 @@ void CommandProcessor::processCommand(const std::string &input)
     std::string commandName;
 
     ss >> commandName;
+
+    auto itAliases = aliases.find(commandName);
+    if (itAliases != aliases.end())
+        commandName = itAliases->second;
 
     auto it = commands.find(commandName);
     if (it != commands.end())
