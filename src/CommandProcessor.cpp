@@ -172,7 +172,15 @@ void CommandProcessor::run()
 
         try
         {
-            processCommand(input);
+            auto itAlias = aliases.find(input);
+            if (itAlias != aliases.end())
+            {
+                processCommand(itAlias->second);
+            }
+            else
+            {
+                processCommand(input);
+            }
         }
         catch (std::runtime_error &e)
         {
