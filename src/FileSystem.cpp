@@ -9,7 +9,6 @@
 FileSystem::FileSystem()
 {
   currentPhysical = getHomeDirectory();
-  help();
 }
 
 FileSystemItem::~FileSystemItem() {}
@@ -30,7 +29,7 @@ void FileSystem::ls() const
 {
   for (const auto &entry : std::filesystem::directory_iterator(currentPhysical))
   {
-    std::cout << entry.path().string() << std::endl;
+    std::cout << entry.path().filename().string() << std::endl;
   }
 }
 
@@ -72,17 +71,21 @@ void FileSystem::help() const
     std::cout << "touch <filename>" << std::endl;
     std::cout << "ls" << std::endl;
     std::cout << "mkdir <directory>" << std::endl;
+    std::cout << "create <name> [import_path]" << std::endl;
+    std::cout << "import <path>" << std::endl;
     std::cout << "cd" << std::endl;
     std::cout << "pwd" << std::endl;
     std::cout << "rm <name>" << std::endl;
     std::cout << "rm -f <name>" << std::endl;
+    std::cout << "alias <command> <alias>" << std::endl;
+    std::cout << "unalias <alias>" << std::endl;
     std::cout << "quit" << std::endl;
     std::cout << "help" << std::endl;
 }
 
 void FileSystem::pwd() const
 {
-    std::cout << currentPhysical  << std::endl;
+    std::cout << currentPhysical.string();
 }
 void FileSystem::tree() const
 {

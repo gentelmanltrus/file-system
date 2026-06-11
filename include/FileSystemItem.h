@@ -2,16 +2,17 @@
 #define FILESYSTEMITEM_H_956230
 
 #include <string>
+#include <filesystem>
 
 class FileSystemItem {
 protected:
-    std::string name;
+    std::filesystem::path name;
 
 public:
-    FileSystemItem(const std::string& name);
+    FileSystemItem(const std::filesystem::path& name);
     virtual ~FileSystemItem(); // must be defined to delete objects through base pointer
 
-    std::string getName() const;
+    std::filesystem::path getName() const;
 
     // Polymorphism in real time
     virtual void display() const = 0;

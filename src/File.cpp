@@ -1,9 +1,9 @@
 #include "../include/File.h"
 
-File::File(const std::string &name)
+File::File(const std::filesystem::path &name)
     : FileSystemItem(name) {}
 
 void File::display() const
 {
-  std::cout << "FILE: " << name << "\n";
+  std::cout << "FILE: " << name.string() << "\n";
 }

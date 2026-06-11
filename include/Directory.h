@@ -12,7 +12,7 @@ private:
     std::vector<std::shared_ptr<FileSystemItem>> items;
 
 public:
-    Directory(const std::string &name);
+    Directory(const std::filesystem::path &name);
     void display() const override;
     bool contains(const std::string &name);
     void addItem(std::shared_ptr<FileSystemItem> item);

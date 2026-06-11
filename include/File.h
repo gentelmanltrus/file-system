@@ -8,7 +8,7 @@
 class File : public FileSystemItem
 {
 public:
-    File(const std::string &name);
+    File(const std::filesystem::path &name);
     void display() const override;
 };
 #endif // FILE_H_9825024
