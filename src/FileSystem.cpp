@@ -79,6 +79,9 @@ void FileSystem::help() const
     std::cout << "rm -f <name>" << std::endl;
     std::cout << "alias <command> <alias>" << std::endl;
     std::cout << "unalias <alias>" << std::endl;
+    std::cout << "tree" << std::endl;
+    std::cout << "report" << std::endl;
+    std::cout << "duplicates" << std::endl;
     std::cout << "quit" << std::endl;
     std::cout << "help" << std::endl;
 }
