@@ -14,6 +14,7 @@ private:
     std::map<std::string, std::function<void(std::stringstream&)>> commands;
     std::map<std::string, std::unique_ptr<FileSystem>> fileSystems;
     std::map<std::string, std::unique_ptr<FileSystem>>::iterator currentFileSystem;
+    std::map<std::string, std::string> aliases;
 public:
     CommandProcessor();
     void run();
