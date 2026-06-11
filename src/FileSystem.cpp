@@ -92,15 +92,15 @@ void FileSystem::tree() const
     }
 
     std::cout << currentPhysical.filename().string() << "\n";
-    
-    for (const auto& entry : std::filesystem::recursive_directory_iterator(currentPhysical)) {
-        auto depth = entry.depth();
-        
-      
+
+    for (auto it = std::filesystem::recursive_directory_iterator(currentPhysical); it != std::filesystem::recursive_directory_iterator(); ++it) {
+        auto depth = it.depth();
+        const auto &entry = *it;
+
         for (int i = 0; i < depth; ++i) {
             std::cout << "  ";
         }
-        
+
         if (entry.is_directory()) {
             std::cout << "└── [" << entry.path().filename().string() << "]\n";
         } else {
