@@ -3,8 +3,8 @@
 #include <vector>
 #include <memory>
 #include <iostream>
-Directory::Directory(const std::filesystem::path &name)
-    : FileSystemItem(name) {}
+Directory::Directory(const std::filesystem::path &name, std::shared_ptr<FileSystemItem> parent)
+    : FileSystemItem(name, parent) {}
 
 bool Directory::contains(const std::string &name)
 {
@@ -33,17 +33,19 @@ void Directory::listItems() const
     }
 }
 
-std::shared_ptr<FileSystemItem> Directory::getItem(const std::string &name) const
+std::vector<std::shared_ptr<FileSystemItem>>::const_iterator Directory::getItem(const std::string &name) const
 {
-    for (const auto &item : items)
+    for (auto it = items.cbegin(); it != items.cend(); ++it)
     {
-        if (auto dir = std::dynamic_pointer_cast<Directory>(item))
+        if ((*it)->getName() == name)
         {
-            if (dir->getName() == name)
-            {
-                return dir;
-            }
+            return it;
         }
     }
     throw std::runtime_error("Item not found");
+}
+
+void Directory::deleteItem(std::vector<std::shared_ptr<FileSystemItem>>::const_iterator it)
+{
+    items.erase(it);
 }

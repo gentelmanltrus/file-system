@@ -131,6 +131,21 @@ CommandProcessor::CommandProcessor()
         currentFileSystem = it;
     };
 
+    commands["delete"] = [this](std::stringstream &ss)
+    {
+        std::string name;
+        if (!(ss >> name))
+            throw std::runtime_error("delete: missing file system name");
+
+        auto it = fileSystems.find(name);
+        if (it == fileSystems.end())
+            throw std::runtime_error("delete: file system not found");
+        if (currentFileSystem == it)
+            throw std::runtime_error("delete: cannot delete currently active file system");
+        
+        fileSystems.erase(it);
+    };
+
     commands["help"] = [this](std::stringstream &)
     {
         currentFileSystem->second->help();
@@ -148,32 +163,49 @@ CommandProcessor::CommandProcessor()
         currentFileSystem->second->pwd();
         std::cout << std::endl;
     };
+
     commands["rm"] = [this](std::stringstream &ss)
+{
+    std::string flag;
+    std::string name;
+
+    ss >> flag >> name;
+
+    if (flag.empty())
+        throw std::runtime_error("rm: missing filename");
+    if (name.empty())
     {
-        std::string flag;
-        std::string name;
+        name = flag;
+        flag.clear();
+    }
 
-        if (!(ss >> flag))
-            throw std::runtime_error("rm: missing filename");
+    bool force = flag.find('f') != std::string::npos;
+    bool strict = (flag.find('s') != std::string::npos) 
+        && dynamic_cast<FileSystemVirtual*>(currentFileSystem->second.get());
 
-        if (flag == "-f")
+    if (!force)
+    {
+        std::cout << "Are you sure you want to remove \"" << name
+                  << "\"? Type \"y\" to confirm:\n";
+
+        std::string answer;
+        std::getline(std::cin >> std::ws, answer);
+
+        if (answer != "y" && answer != "Y")
         {
-            if (!(ss >> name))
-                throw std::runtime_error("rm: missing filename after -f");
-            currentFileSystem->second->remove(name);
+            std::cout << "rm: cancelled\n";
+            return;
         }
-        else
-        {
-            name = flag;
-            std::cout << "Are you sure you want to remove \"" << name << "\"? Type \"y\" to confirm:" << std::endl;
-            std::string answer;
-            std::getline(std::cin, answer);
-            if (answer == "y" || answer == "Y")
-                currentFileSystem->second->remove(name);
-            else
-                std::cout << "rm: cancelled" << std::endl;
-        }
-    };
+    }
+
+    currentFileSystem->second->remove(name);
+
+    if (strict)
+    {
+        std::filesystem::path full = (std::filesystem::path)VIRTUAL_FOLDER_NAME / name;
+        currentFileSystem->second->FileSystem::remove(full.string());
+    }
+};
   
     commands["tree"] = [this](std::stringstream&)
     {
@@ -206,7 +238,10 @@ void CommandProcessor::run()
         std::cout << ">";
         std::getline(std::cin, input);
         if (input == "quit")
+        {
+            std::cout << "Exiting..." << std::endl;
             break;
+        }
         if (input == "")
             continue;
 

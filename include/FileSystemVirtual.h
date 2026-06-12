@@ -6,6 +6,8 @@
 #include "FileSystem.h"
 #include "Directory.h"
 
+#define VIRTUAL_FOLDER_NAME "virtual_folder"
+
 class FileSystemVirtual : public FileSystem
 {
 private:
