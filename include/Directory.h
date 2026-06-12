@@ -17,5 +17,6 @@ public:
     bool contains(const std::string &name);
     void addItem(std::shared_ptr<FileSystemItem> item);
     void listItems() const;
+    std::shared_ptr<FileSystemItem> getItem(const std::string &name) const;
 };
 #endif // DIRECTORY_H_786402

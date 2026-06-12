@@ -173,6 +173,7 @@ void FileSystem::duplicates() const
                 for (const auto& path : dupFiles) {
                     std::cout << "  -> " << fs::relative(path, currentPhysical).string() << "\n";
                 }
+                std::cout << std::endl;
             }
         }
     }
@@ -214,7 +215,7 @@ void FileSystem::report() const
         std::cout << "Type: " << ext << " Amount: " << info.count << "\n";
         if (info.count > 0) {
             std::cout << "  Biggest file: " << info.largestFilePath.filename().string() 
-                      << " (" << info.maxSize << " bytes)\n";
+                      << " (" << info.maxSize << " bytes)\n\n";
         }
     }
 }

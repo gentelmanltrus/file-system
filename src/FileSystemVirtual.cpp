@@ -1,5 +1,7 @@
 #include <fstream>
 #include <filesystem>
+#include <memory>
+#include <iostream>
 #include "../include/FileSystemVirtual.h"
 #include "../include/File.h"
 #include "../include/Directory.h"
@@ -56,8 +58,6 @@ void FileSystemVirtual::mkdir(const std::string &name)
     throw std::runtime_error("Directory or file already exists");
   std::shared_ptr<Directory> newDir = std::make_shared<Directory>(name);
   currentPathVirtual->addItem(newDir);
-
-  // must be defined
 }
 
 void FileSystemVirtual::touch(const std::string &name)
@@ -81,4 +81,28 @@ void FileSystemVirtual::ls() const
     throw std::runtime_error("No current directory");
 
   currentPathVirtual->listItems();
+}
+
+void FileSystemVirtual::cd(const std::string &name)
+{
+  if (!currentPathVirtual)
+    throw std::runtime_error("No current directory");
+
+  auto item = currentPathVirtual->getItem(name);
+  if (!item)
+    throw std::runtime_error("Directory not found");
+
+  auto dir = std::dynamic_pointer_cast<Directory>(item);
+  if (!dir)
+    throw std::runtime_error("Item is not a directory");
+
+  currentPathVirtual = dir;
+}
+
+void FileSystemVirtual::pwd() const
+{
+  if (!currentPathVirtual)
+    throw std::runtime_error("No current directory");
+
+  std::cout << currentPathVirtual->getName().string();
 }

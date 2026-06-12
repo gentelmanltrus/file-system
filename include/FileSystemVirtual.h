@@ -19,5 +19,8 @@ public:
     void mkdir(const std::string &name) override;
     void touch(const std::string &name) override;
     void ls() const override;
+    void cd(const std::string &name) override;
+    void remove(const std::string &name) override;
+    void pwd() const override;
 };
 #endif // FILESYSTEMVIRTUAL_H_5482301

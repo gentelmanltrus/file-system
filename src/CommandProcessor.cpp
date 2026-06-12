@@ -9,7 +9,12 @@ CommandProcessor::CommandProcessor()
         std::string newAlias;
 
         if (!(ss >> existingCommand))
-            throw std::runtime_error("alias: missing command name");
+        {
+            for (const auto& pair : aliases)
+            {
+                std::cout << pair.first << " -> " << pair.second << std::endl;
+            }
+        }
         if (!(ss >> newAlias))
             throw std::runtime_error("alias: missing new alias");
 
@@ -104,6 +109,26 @@ CommandProcessor::CommandProcessor()
 
             fsVirtual->import(path);
         }
+    };
+
+    commands["switch"] = [this](std::stringstream &ss)
+    {
+        std::string fsName;
+        if (!(ss >> fsName))
+        {
+            std::cout << "Available file systems:" << std::endl;
+            for (const auto& pair : fileSystems)
+            {
+                std::cout << "  - " << pair.first << std::endl;
+            }
+            return;
+        }
+
+        auto it = fileSystems.find(fsName);
+        if (it == fileSystems.end())
+            throw std::runtime_error("switch: file system not found");
+
+        currentFileSystem = it;
     };
 
     commands["help"] = [this](std::stringstream &)
