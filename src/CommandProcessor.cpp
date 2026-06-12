@@ -152,17 +152,17 @@ CommandProcessor::CommandProcessor()
   
     commands["tree"] = [this](std::stringstream&)
     {
-        fileSystem.tree();
+        currentFileSystem->second->tree();
     };
 
     commands["report"] = [this](std::stringstream&)
     {
-        fileSystem.report();
+        currentFileSystem->second->report();
     };
 
     commands["duplicates"] = [this](std::stringstream&)
     {
-        fileSystem.duplicates();
+        currentFileSystem->second->duplicates();
     };
 
     // initialize with one default file system
