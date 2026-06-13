@@ -10,7 +10,7 @@ CommandProcessor::CommandProcessor()
 
         if (!(ss >> existingCommand))
         {
-            for (const auto& pair : aliases)
+            for (const auto &pair : aliases)
             {
                 std::cout << pair.first << " -> " << pair.second << std::endl;
             }
@@ -21,7 +21,7 @@ CommandProcessor::CommandProcessor()
         auto itCommands1 = commands.find(existingCommand);
         if (itCommands1 == commands.end())
             throw std::runtime_error("alias: command does not exist");
-        for (const auto& pair : aliases)
+        for (const auto &pair : aliases)
         {
             if (pair.second == existingCommand)
                 throw std::runtime_error("alias: command already has an alias");
@@ -98,8 +98,7 @@ CommandProcessor::CommandProcessor()
 
         if (!fsVirtual)
         {
-            std::cout << "Physical file system does not support import. Use a virtual file system to import." << std::endl;
-            return;
+            throw std::runtime_error("import: current file system does not support import");
         }
         else
         {
@@ -117,7 +116,7 @@ CommandProcessor::CommandProcessor()
         if (!(ss >> fsName))
         {
             std::cout << "Available file systems:" << std::endl;
-            for (const auto& pair : fileSystems)
+            for (const auto &pair : fileSystems)
             {
                 std::cout << "  - " << pair.first << std::endl;
             }
@@ -142,7 +141,7 @@ CommandProcessor::CommandProcessor()
             throw std::runtime_error("delete: file system not found");
         if (currentFileSystem == it)
             throw std::runtime_error("delete: cannot delete currently active file system");
-        
+
         fileSystems.erase(it);
     };
 
@@ -165,59 +164,74 @@ CommandProcessor::CommandProcessor()
     };
 
     commands["rm"] = [this](std::stringstream &ss)
-{
-    std::string flag;
-    std::string name;
-
-    ss >> flag >> name;
-
-    if (flag.empty())
-        throw std::runtime_error("rm: missing filename");
-    if (name.empty())
     {
-        name = flag;
-        flag.clear();
-    }
+        std::string flag;
+        std::string name;
 
-    bool force = flag.find('f') != std::string::npos;
-    bool strict = (flag.find('s') != std::string::npos) 
-        && dynamic_cast<FileSystemVirtual*>(currentFileSystem->second.get());
+        ss >> flag >> name;
 
-    if (!force)
-    {
-        std::cout << "Are you sure you want to remove \"" << name
-                  << "\"? Type \"y\" to confirm:\n";
-
-        std::string answer;
-        std::getline(std::cin >> std::ws, answer);
-
-        if (answer != "y" && answer != "Y")
+        if (flag.empty())
+            throw std::runtime_error("rm: missing filename");
+        if (name.empty())
         {
-            std::cout << "rm: cancelled\n";
-            return;
+            name = flag;
+            flag.clear();
         }
-    }
 
-    currentFileSystem->second->remove(name);
+        bool force = flag.find('f') != std::string::npos;
+        bool strict = (flag.find('s') != std::string::npos);
+        auto virtualFileSystem = dynamic_cast<FileSystemVirtual *>(currentFileSystem->second.get());
+        bool isVirtual = virtualFileSystem != nullptr;
 
-    if (strict)
-    {
-        std::filesystem::path full = (std::filesystem::path)VIRTUAL_FOLDER_NAME / name;
-        currentFileSystem->second->FileSystem::remove(full.string());
-    }
-};
-  
-    commands["tree"] = [this](std::stringstream&)
+        if (!force)
+        {
+            std::cout << "Are you sure you want to remove \"" << name
+                      << "\"? Type \"y\" to confirm:\n";
+
+            std::string answer;
+            std::getline(std::cin >> std::ws, answer);
+
+            if (answer != "y" && answer != "Y")
+            {
+                std::cout << "rm: cancelled\n";
+                return;
+            }
+        }
+
+        if (strict)
+        {
+            if (!isVirtual)
+                throw std::runtime_error(
+                    "rm: strict mode is only supported in virtual file systems");
+
+            auto item = virtualFileSystem->getItem(name);
+            currentFileSystem->second->FileSystem::remove(item->getName().string());
+        }
+        
+        if (isVirtual)
+        {
+            auto item = virtualFileSystem->getItem(name);
+            currentFileSystem->second->remove(item->getName().filename().string());
+        }
+        else
+        {
+            auto currentPhysical = currentFileSystem->second->getCurrentPhysical();
+            auto full = currentPhysical / name;
+            currentFileSystem->second->FileSystem::remove(full.string());
+        }
+    };
+
+    commands["tree"] = [this](std::stringstream &)
     {
         currentFileSystem->second->tree();
     };
 
-    commands["report"] = [this](std::stringstream&)
+    commands["report"] = [this](std::stringstream &)
     {
         currentFileSystem->second->report();
     };
 
-    commands["duplicates"] = [this](std::stringstream&)
+    commands["duplicates"] = [this](std::stringstream &)
     {
         currentFileSystem->second->duplicates();
     };
@@ -233,7 +247,7 @@ void CommandProcessor::run()
     std::string input;
     while (true)
     {
-        std::cout << "("<< currentFileSystem->first << ") ";
+        std::cout << "(" << currentFileSystem->first << ") ";
         currentFileSystem->second->pwd();
         std::cout << ">";
         std::getline(std::cin, input);

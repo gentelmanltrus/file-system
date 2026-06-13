@@ -24,5 +24,6 @@ public:
     void cd(const std::string &name) override;
     void remove(const std::string &name) override;
     void pwd() const override;
+    std::shared_ptr<FileSystemItem> getItem(const std::string &name) const;
 };
 #endif // FILESYSTEMVIRTUAL_H_5482301

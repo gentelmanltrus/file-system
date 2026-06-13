@@ -5,5 +5,5 @@ File::File(const std::filesystem::path &name, std::shared_ptr<FileSystemItem> pa
 
 void File::display() const
 {
-  std::cout << name.string() << std::endl;
+  std::cout << name.filename().string() << std::endl;
 }

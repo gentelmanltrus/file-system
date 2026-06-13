@@ -66,6 +66,7 @@ void FileSystemVirtual::touch(const std::string &name)
   std::filesystem::create_directory(VIRTUAL_FOLDER_NAME);
   std::filesystem::path full = (std::filesystem::path)VIRTUAL_FOLDER_NAME / name;
   FileSystem::touch(full.string());
+  full = std::filesystem::current_path() / full;
 
   if (!currentPathVirtual)
     throw std::runtime_error("No current directory");
@@ -73,7 +74,7 @@ void FileSystemVirtual::touch(const std::string &name)
   if (currentPathVirtual->contains(name))
     throw std::runtime_error("File already exists");
 
-  std::shared_ptr<File> file = std::make_shared<File>(name, currentPathVirtual);
+  std::shared_ptr<File> file = std::make_shared<File>(full, currentPathVirtual);
   currentPathVirtual->addItem(file);
 }
 
@@ -125,7 +126,7 @@ void FileSystemVirtual::pwd() const
 
     while (temp)
     {
-        pathParts.push_back(temp->getName().string());
+        pathParts.push_back(temp->getName().filename().string());
         temp = std::dynamic_pointer_cast<Directory>(temp->getParent());
     }
 
@@ -135,4 +136,11 @@ void FileSystemVirtual::pwd() const
         if (it + 1 != pathParts.rend())
             std::cout << "/";
     }
+}
+
+std::shared_ptr<FileSystemItem> FileSystemVirtual::getItem(const std::string &name) const
+{
+    if (!currentPathVirtual)
+        throw std::runtime_error("No current directory");
+    return *currentPathVirtual->getItem(name);
 }

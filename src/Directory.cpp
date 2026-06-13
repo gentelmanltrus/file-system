@@ -22,7 +22,7 @@ void Directory::addItem(std::shared_ptr<FileSystemItem> item)
 
 void Directory::display() const
 {
-    std::cout << name.string() << "/" << std::endl;
+    std::cout << name.filename().string() << "/" << std::endl;
 }
 
 void Directory::listItems() const
@@ -37,7 +37,7 @@ std::vector<std::shared_ptr<FileSystemItem>>::const_iterator Directory::getItem(
 {
     for (auto it = items.cbegin(); it != items.cend(); ++it)
     {
-        if ((*it)->getName() == name)
+        if ((*it)->getName().filename().string() == name)
         {
             return it;
         }

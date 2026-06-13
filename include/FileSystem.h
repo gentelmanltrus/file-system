@@ -27,5 +27,6 @@ public:
     void report() const;
     void duplicates() const;
     static std::filesystem::path getHomeDirectory();
+    std::filesystem::path getCurrentPhysical() const;
 };
 #endif // FILESYSTEM_H_28539235

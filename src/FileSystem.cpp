@@ -55,11 +55,10 @@ void FileSystem::cd(const std::string &name)
 
 void FileSystem::remove(const std::string &name)
 {
-    std::filesystem::path full = currentPhysical / name;
+    std::filesystem::path full = name;
     if (!std::filesystem::exists(full))
     {
-        std::cout << "rm: \"" << name << "\": no such file or directory" << std::endl;
-        return;
+        throw std::runtime_error("rm: \"" + name + "\": no such file or directory");
     }
     std::filesystem::remove_all(full);
     std::cout << "\"" << full.filename().string() << "\" removed" << std::endl;
@@ -236,4 +235,9 @@ std::filesystem::path FileSystem::getHomeDirectory()
     }
 
     return std::filesystem::current_path();
+}
+
+std::filesystem::path FileSystem::getCurrentPhysical() const 
+{ 
+    return currentPhysical; 
 }
