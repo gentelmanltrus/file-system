@@ -18,6 +18,7 @@ FileSystem::FileSystem(const std::filesystem::path &path)
 }
 
 FileSystemItem::~FileSystemItem() {}
+
 // long path, non relative
 void FileSystem::mkdir(const std::string &name)
 {
@@ -26,32 +27,44 @@ void FileSystem::mkdir(const std::string &name)
     //if relative just get it
     //if non relative + it to full
 
-    if (target.is_absolute()) {
+    if (target.is_absolute()) 
+    {
         full = target;
-    } else {
+    } 
+    else {
         full = currentPhysical / target;
     }
 
     // create_directories
     std::filesystem::create_directories(full);
 }
+
 void FileSystem::touch(const std::string &name)
 {
     std::filesystem::path target(name);
     std::filesystem::path full;
 
-    if (target.is_absolute()) {
+    if (target.is_absolute()) 
+    {
         full = target;
     } else {
         full = currentPhysical / target;
     }
 
-    //if no real folders - making up parental folders
-    if (full.has_parent_path()) {
-        std::filesystem::create_directories(full.parent_path());
+    if (!std::filesystem::exists(full.parent_path())) 
+    {
+        throw std::runtime_error("touch: parent directory does not exist");
+    }
+
+    if (std::filesystem::exists(full)) 
+    {
+        throw std::runtime_error("touch: file already exists");
     }
 
     std::ofstream file(full);
+    if (!file) {
+        throw std::runtime_error("touch: failed to create file");
+    }
 }
 
 void FileSystem::ls() const
@@ -67,26 +80,37 @@ void FileSystem::cd(const std::string &name)
     std::filesystem::path target(name);
     std::filesystem::path full;
     // CHECK IF DIR OR FILE IS REAL
-    if (target.is_absolute()) {
+    if (target.is_absolute()) 
+    {
         full = target;
-    } else {
+    } 
+    else 
+    {
         full = currentPhysical / target;
     }
 
-    if (std::filesystem::is_directory(full))
-    {
-        // weakly_canonical - deleting . .. etc
-        currentPhysical = std::filesystem::weakly_canonical(full);
-    }
-    else
-    {
-        std::cout << "Directory does not exist" << std::endl;
-    }
+    if (!std::filesystem::exists(full))
+        throw std::runtime_error("cd: path does not exist");
+
+    if (!std::filesystem::is_directory(full))
+        throw std::runtime_error("cd: not a directory");
+
+    currentPhysical = std::filesystem::weakly_canonical(full);
 }
 
 void FileSystem::remove(const std::string &name)
 {
-    std::filesystem::path full = name;
+    std::filesystem::path target(name);
+    std::filesystem::path full;
+    if (target.is_absolute()) 
+    {
+        full = target;
+    } 
+    else 
+    {
+        full = currentPhysical / target;
+    }
+    
     if (!std::filesystem::exists(full))
     {
         throw std::runtime_error("rm: \"" + name + "\": no such file or directory");

@@ -204,20 +204,20 @@ CommandProcessor::CommandProcessor()
                 throw std::runtime_error(
                     "rm: strict mode is only supported in virtual file systems");
 
-            auto item = virtualFileSystem->getItem(name);
-            currentFileSystem->second->FileSystem::remove(item->getName().string());
+            std::filesystem::path target(name);
+            target = std::filesystem::current_path() / VIRTUAL_FOLDER_NAME / target.filename();
+            if (!std::filesystem::exists(target))
+                throw std::runtime_error("rm: strict mode: file does not exist in physical file system " + target.string());
+            currentFileSystem->second->FileSystem::remove(target.string());
         }
-        
+
         if (isVirtual)
         {
-            auto item = virtualFileSystem->getItem(name);
-            currentFileSystem->second->remove(item->getName().filename().string());
+            currentFileSystem->second->remove(name);
         }
         else
         {
-            auto currentPhysical = currentFileSystem->second->getCurrentPhysical();
-            auto full = currentPhysical / name;
-            currentFileSystem->second->FileSystem::remove(full.string());
+            currentFileSystem->second->FileSystem::remove(name);
         }
     };
 

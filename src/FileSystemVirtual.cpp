@@ -70,7 +70,8 @@ void FileSystemVirtual::touch(const std::string &name)
 {
   // Adding virtual file to physical file system folder
   std::filesystem::create_directory(VIRTUAL_FOLDER_NAME);
-  std::filesystem::path full = (std::filesystem::path)VIRTUAL_FOLDER_NAME / name;
+  auto filename = std::filesystem::path(name).filename(); 
+  std::filesystem::path full = (std::filesystem::path)VIRTUAL_FOLDER_NAME / filename;
   FileSystem::touch(full.string());
   full = std::filesystem::current_path() / full;
 
@@ -109,11 +110,19 @@ void FileSystemVirtual::remove(const std::string &name)
   if (!currentPathVirtual)
     throw std::runtime_error("No current directory");
 
-  auto item = currentPathVirtual->getItem(name);
-  currentPathVirtual->deleteItem(item);
+  std::filesystem::path target(name);
+  std::string itemName = target.filename().string();
+  std::shared_ptr<Directory> targetDir = resolveTargetDirectory(name);
+
+  targetDir->deleteItem(targetDir->getItem(itemName));
 }
 
 void FileSystemVirtual::pwd() const
+{
+    std::cout << getCurrentVirtual().string();
+}
+
+std::filesystem::path FileSystemVirtual::getCurrentVirtual() const
 {
     if (!currentPathVirtual)
         throw std::runtime_error("No current directory");
@@ -127,12 +136,14 @@ void FileSystemVirtual::pwd() const
         temp = std::dynamic_pointer_cast<Directory>(temp->getParent());
     }
 
+    std::stringstream ss;
     for (auto it = pathParts.rbegin(); it != pathParts.rend(); ++it)
     {
-        std::cout << *it;
+        ss << *it;
         if (it + 1 != pathParts.rend())
-            std::cout << "/";
+            ss << "/";
     }
+    return std::filesystem::path(ss.str());
 }
 
 std::shared_ptr<FileSystemItem> FileSystemVirtual::getItem(const std::string &name) const
