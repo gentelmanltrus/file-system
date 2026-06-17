@@ -12,17 +12,40 @@ FileSystem::FileSystem()
 }
 
 FileSystemItem::~FileSystemItem() {}
-
+// long path, non relative
 void FileSystem::mkdir(const std::string &name)
 {
-  std::filesystem::path full = currentPhysical / name;
-  std::filesystem::create_directories(full);
-}
+    std::filesystem::path target(name);
+    std::filesystem::path full;
+    //if relative just get it
+    //if non relative + it to full
 
+    if (target.is_absolute()) {
+        full = target;
+    } else {
+        full = currentPhysical / target;
+    }
+
+    // create_directories
+    std::filesystem::create_directories(full);
+}
 void FileSystem::touch(const std::string &name)
 {
-  std::filesystem::path full = currentPhysical / name;
-  std::ofstream file(full);
+    std::filesystem::path target(name);
+    std::filesystem::path full;
+
+    if (target.is_absolute()) {
+        full = target;
+    } else {
+        full = currentPhysical / target;
+    }
+
+    //if no real folders - making up parental folders
+    if (full.has_parent_path()) {
+        std::filesystem::create_directories(full.parent_path());
+    }
+
+    std::ofstream file(full);
 }
 
 void FileSystem::ls() const
@@ -35,15 +58,23 @@ void FileSystem::ls() const
 
 void FileSystem::cd(const std::string &name)
 {
-    std::filesystem::path target = currentPhysical / name;
+    std::filesystem::path target(name);
+    std::filesystem::path full;
+    // CHECK IF DIR OR FILE IS REAL
+    if (target.is_absolute()) {
+        full = target;
+    } else {
+        full = currentPhysical / target;
+    }
 
-    if (std::filesystem::is_directory(target))
+    if (std::filesystem::is_directory(full))
     {
-        currentPhysical = std::filesystem::canonical(target);
+        // weakly_canonical - deleting . .. etc
+        currentPhysical = std::filesystem::weakly_canonical(full);
     }
     else
     {
-      std::cout << "Directory does not exist" << std::endl;
+        std::cout << "Directory does not exist" << std::endl;
     }
 }
 
