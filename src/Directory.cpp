@@ -11,7 +11,7 @@ bool Directory::contains(const std::string &name)
     return std::find_if(items.begin(), items.end(),
                         [&name](const std::shared_ptr<FileSystemItem> &item)
                         {
-                            return item->getName() == name;
+                            return item->getName().filename().string() == name;
                         }) != items.end();
 }
 

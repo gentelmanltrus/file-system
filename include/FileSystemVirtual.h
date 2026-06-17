@@ -11,7 +11,7 @@
 class FileSystemVirtual : public FileSystem
 {
 private:
-    //std::shared_ptr<Directory> root;
+    std::shared_ptr<Directory> root;
     std::shared_ptr<Directory> currentPathVirtual;
 
 public:
@@ -25,5 +25,8 @@ public:
     void remove(const std::string &name) override;
     void pwd() const override;
     std::shared_ptr<FileSystemItem> getItem(const std::string &name) const;
+
+private:
+    std::shared_ptr<Directory> navigate(const std::filesystem::path &path) const;
 };
 #endif // FILESYSTEMVIRTUAL_H_5482301

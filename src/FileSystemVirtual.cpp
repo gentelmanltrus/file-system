@@ -10,7 +10,8 @@
 
 FileSystemVirtual::FileSystemVirtual() : FileSystem(std::filesystem::current_path())
 {
-  currentPathVirtual = std::make_shared<Directory>("root");
+  root = std::make_shared<Directory>("root");
+  currentPathVirtual = root;
 }
 
 void FileSystemVirtual::import(const std::filesystem::path &path)
@@ -71,11 +72,21 @@ void FileSystemVirtual::touch(const std::string &name)
   if (!currentPathVirtual)
     throw std::runtime_error("No current directory");
 
-  if (currentPathVirtual->contains(name))
+  std::filesystem::path target(name);
+  std::filesystem::path dirPart = target.parent_path();
+  std::string fileName = target.filename().string();
+  std::shared_ptr<Directory> targetDir;
+
+  if (!dirPart.empty())
+    targetDir = navigate(dirPart);
+  else
+    targetDir = currentPathVirtual;
+
+  if (targetDir->contains(fileName))
     throw std::runtime_error("File already exists");
 
-  std::shared_ptr<File> file = std::make_shared<File>(full, currentPathVirtual);
-  currentPathVirtual->addItem(file);
+  std::shared_ptr<File> file = std::make_shared<File>(full, targetDir);
+  targetDir->addItem(file);
 }
 
 void FileSystemVirtual::ls() const
@@ -91,20 +102,7 @@ void FileSystemVirtual::cd(const std::string &name)
   if (!currentPathVirtual)
     throw std::runtime_error("No current directory");
 
-  if (name == "..")
-  {
-    auto parent = currentPathVirtual->getParent();
-    if (!parent)
-      throw std::runtime_error("Already at root directory");
-    currentPathVirtual = std::dynamic_pointer_cast<Directory>(parent);
-    return;
-  }
-
-  auto item = currentPathVirtual->getItem(name);
-  auto dir = std::dynamic_pointer_cast<Directory>(*item);
-  if (!dir)
-    throw std::runtime_error("Directory not found");
-  currentPathVirtual = dir;
+  currentPathVirtual = navigate(name);
 }
 
 void FileSystemVirtual::remove(const std::string &name)
@@ -143,4 +141,41 @@ std::shared_ptr<FileSystemItem> FileSystemVirtual::getItem(const std::string &na
     if (!currentPathVirtual)
         throw std::runtime_error("No current directory");
     return *currentPathVirtual->getItem(name);
+}
+
+std::shared_ptr<Directory> FileSystemVirtual::navigate(const std::filesystem::path &path) const
+{
+    std::shared_ptr<Directory> current;
+    auto it = path.begin();
+
+    if (*it == "root")
+    {
+        current = root;
+        ++it;
+    }
+    else
+    {
+        current = currentPathVirtual;
+    }
+
+    while(it != path.end())
+    {
+        if (*it == "..")
+        {
+            auto parent = current->getParent();
+            if (!parent)
+                throw std::runtime_error("Already at root directory");
+            current = std::dynamic_pointer_cast<Directory>(parent);
+        }
+        else
+        {
+            auto child = *current->getItem(it->string());
+            current = std::dynamic_pointer_cast<Directory>(child);
+            if (!current)
+                throw std::runtime_error("Must be a directory");
+        }
+        ++it;
+    }
+
+    return current;
 }
