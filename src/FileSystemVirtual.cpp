@@ -55,10 +55,15 @@ void FileSystemVirtual::mkdir(const std::string &name)
 {
   if (!currentPathVirtual)
     throw std::runtime_error("No current directory");
-  if (currentPathVirtual->contains(name))
+
+  std::filesystem::path target(name);
+  std::string dirName = target.filename().string();
+  std::shared_ptr<Directory> targetDir = resolveTargetDirectory(name);
+
+  if (targetDir->contains(dirName))
     throw std::runtime_error("Directory or file already exists");
-  std::shared_ptr<Directory> newDir = std::make_shared<Directory>(name, currentPathVirtual);
-  currentPathVirtual->addItem(newDir);
+  std::shared_ptr<Directory> newDir = std::make_shared<Directory>(dirName, targetDir);
+  targetDir->addItem(newDir);
 }
 
 void FileSystemVirtual::touch(const std::string &name)
@@ -73,14 +78,8 @@ void FileSystemVirtual::touch(const std::string &name)
     throw std::runtime_error("No current directory");
 
   std::filesystem::path target(name);
-  std::filesystem::path dirPart = target.parent_path();
   std::string fileName = target.filename().string();
-  std::shared_ptr<Directory> targetDir;
-
-  if (!dirPart.empty())
-    targetDir = navigate(dirPart);
-  else
-    targetDir = currentPathVirtual;
+  std::shared_ptr<Directory> targetDir = resolveTargetDirectory(name);
 
   if (targetDir->contains(fileName))
     throw std::runtime_error("File already exists");
@@ -172,10 +171,23 @@ std::shared_ptr<Directory> FileSystemVirtual::navigate(const std::filesystem::pa
             auto child = *current->getItem(it->string());
             current = std::dynamic_pointer_cast<Directory>(child);
             if (!current)
-                throw std::runtime_error("Must be a directory");
+                throw std::runtime_error(it->string() + " is not a directory");
         }
         ++it;
     }
 
     return current;
+}
+
+std::shared_ptr<Directory> FileSystemVirtual::resolveTargetDirectory(const std::filesystem::path &target) const
+{
+    std::filesystem::path dirPart = target.parent_path();
+    std::shared_ptr<Directory> targetDir;
+
+    if (!dirPart.empty())
+        targetDir = navigate(dirPart);
+    else
+        targetDir = currentPathVirtual;
+
+    return targetDir;
 }

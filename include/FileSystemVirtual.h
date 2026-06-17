@@ -28,5 +28,6 @@ public:
 
 private:
     std::shared_ptr<Directory> navigate(const std::filesystem::path &path) const;
+    std::shared_ptr<Directory> resolveTargetDirectory(const std::filesystem::path &target) const;
 };
 #endif // FILESYSTEMVIRTUAL_H_5482301
