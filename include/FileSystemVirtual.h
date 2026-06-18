@@ -20,11 +20,10 @@ public:
     void import(const std::filesystem::path& path);
     void mkdir(const std::string &name) override;
     void touch(const std::string &name) override;
-    void ls() const override;
+    void ls(const std::string &name = "") const override;
     void cd(const std::string &name) override;
     void remove(const std::string &name) override;
     void pwd() const override;
-    std::shared_ptr<FileSystemItem> getItem(const std::string &name) const;
     std::filesystem::path getCurrentVirtual() const;
 
 private:

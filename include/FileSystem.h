@@ -18,7 +18,7 @@ public:
 
     virtual void mkdir(const std::string &name);
     virtual void touch(const std::string &name);
-    virtual void ls() const;
+    virtual void ls(const std::string &name = "") const;
     virtual void cd(const std::string &name);
     virtual void remove(const std::string &name);
     virtual void help() const;

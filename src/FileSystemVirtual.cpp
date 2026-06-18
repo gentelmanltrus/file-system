@@ -89,12 +89,31 @@ void FileSystemVirtual::touch(const std::string &name)
   targetDir->addItem(file);
 }
 
-void FileSystemVirtual::ls() const
+void FileSystemVirtual::ls(const std::string &name) const
 {
-  if (!currentPathVirtual)
-    throw std::runtime_error("No current directory");
+  if (name == "root")
+  {
+    root->listItems();
+    return;
+  }
+  
+  if (name.empty())
+  {
+    currentPathVirtual->listItems();
+    return;
+  }
+  
+  std::filesystem::path target(name);
+  std::shared_ptr<Directory> parent = resolveTargetDirectory(target.parent_path());
+  auto item = parent->getItem(target.filename().string());
+  
+  if (!(*item))
+    throw std::runtime_error("No such file or directory");
 
-  currentPathVirtual->listItems();
+  if (auto dir = std::dynamic_pointer_cast<Directory>(*item))
+    dir->listItems();
+  else
+    (*item)->display();
 }
 
 void FileSystemVirtual::cd(const std::string &name)
@@ -146,19 +165,12 @@ std::filesystem::path FileSystemVirtual::getCurrentVirtual() const
     return std::filesystem::path(ss.str());
 }
 
-std::shared_ptr<FileSystemItem> FileSystemVirtual::getItem(const std::string &name) const
-{
-    if (!currentPathVirtual)
-        throw std::runtime_error("No current directory");
-    return *currentPathVirtual->getItem(name);
-}
-
 std::shared_ptr<Directory> FileSystemVirtual::navigate(const std::filesystem::path &path) const
 {
     std::shared_ptr<Directory> current;
     auto it = path.begin();
 
-    if (*it == "root")
+    if (it != path.end() && *it == "root")
     {
         current = root;
         ++it;
@@ -177,12 +189,24 @@ std::shared_ptr<Directory> FileSystemVirtual::navigate(const std::filesystem::pa
                 throw std::runtime_error("Already at root directory");
             current = std::dynamic_pointer_cast<Directory>(parent);
         }
+
+        else if (*it == "." && current == root)
+        {
+            ++it;
+            continue;
+        }
+        else if (*it == "." && current != root)
+        {
+            throw std::runtime_error("Invalid path: cannot use '.' to navigate from a non-root directory");
+        }
         else
         {
             auto child = *current->getItem(it->string());
+            if (!child)
+              throw std::runtime_error("No such file or directory");
             current = std::dynamic_pointer_cast<Directory>(child);
             if (!current)
-                throw std::runtime_error(it->string() + " is not a directory");
+              throw std::runtime_error(it->string() + " is not a directory");
         }
         ++it;
     }

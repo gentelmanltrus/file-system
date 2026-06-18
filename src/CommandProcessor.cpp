@@ -7,16 +7,20 @@ CommandProcessor::CommandProcessor()
     {
         std::string existingCommand;
         std::string newAlias;
+        ss >> existingCommand >> newAlias;
 
-        if (!(ss >> existingCommand))
+        if (existingCommand.empty() && newAlias.empty())
         {
             for (const auto &pair : aliases)
             {
                 std::cout << pair.first << " -> " << pair.second << std::endl;
             }
+            return;
         }
-        if (!(ss >> newAlias))
-            throw std::runtime_error("alias: missing new alias");
+        else if (existingCommand.empty() || newAlias.empty())
+        {
+            throw std::runtime_error("alias: missing existing command or new alias");
+        }
 
         auto itCommands1 = commands.find(existingCommand);
         if (itCommands1 == commands.end())
@@ -59,9 +63,13 @@ CommandProcessor::CommandProcessor()
         currentFileSystem->second->touch(fileName);
     };
 
-    commands["ls"] = [this](std::stringstream &)
+    commands["ls"] = [this](std::stringstream &ss)
     {
-        currentFileSystem->second->ls();
+        std::string name;
+        if (!(ss >> name))
+            name = "";
+
+        currentFileSystem->second->ls(name);
     };
 
     commands["mkdir"] = [this](std::stringstream &ss)
