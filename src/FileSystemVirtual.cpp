@@ -10,7 +10,8 @@
 
 FileSystemVirtual::FileSystemVirtual() : FileSystem(std::filesystem::current_path())
 {
-  currentPathVirtual = std::make_shared<Directory>("root");
+  root = std::make_shared<Directory>("root");
+  currentPathVirtual = root;
 }
 
 void FileSystemVirtual::import(const std::filesystem::path &path)
@@ -54,36 +55,65 @@ void FileSystemVirtual::mkdir(const std::string &name)
 {
   if (!currentPathVirtual)
     throw std::runtime_error("No current directory");
-  if (currentPathVirtual->contains(name))
+
+  std::filesystem::path target(name);
+  std::string dirName = target.filename().string();
+  std::shared_ptr<Directory> targetDir = resolveTargetDirectory(name);
+
+  if (targetDir->contains(dirName))
     throw std::runtime_error("Directory or file already exists");
-  std::shared_ptr<Directory> newDir = std::make_shared<Directory>(name, currentPathVirtual);
-  currentPathVirtual->addItem(newDir);
+  std::shared_ptr<Directory> newDir = std::make_shared<Directory>(dirName, targetDir);
+  targetDir->addItem(newDir);
 }
 
 void FileSystemVirtual::touch(const std::string &name)
 {
   // Adding virtual file to physical file system folder
   std::filesystem::create_directory(VIRTUAL_FOLDER_NAME);
-  std::filesystem::path full = (std::filesystem::path)VIRTUAL_FOLDER_NAME / name;
+  auto filename = std::filesystem::path(name).filename(); 
+  std::filesystem::path full = (std::filesystem::path)VIRTUAL_FOLDER_NAME / filename;
   FileSystem::touch(full.string());
   full = std::filesystem::current_path() / full;
 
   if (!currentPathVirtual)
     throw std::runtime_error("No current directory");
 
-  if (currentPathVirtual->contains(name))
+  std::filesystem::path target(name);
+  std::string fileName = target.filename().string();
+  std::shared_ptr<Directory> targetDir = resolveTargetDirectory(name);
+
+  if (targetDir->contains(fileName))
     throw std::runtime_error("File already exists");
 
-  std::shared_ptr<File> file = std::make_shared<File>(full, currentPathVirtual);
-  currentPathVirtual->addItem(file);
+  std::shared_ptr<File> file = std::make_shared<File>(full, targetDir);
+  targetDir->addItem(file);
 }
 
-void FileSystemVirtual::ls() const
+void FileSystemVirtual::ls(const std::string &name) const
 {
-  if (!currentPathVirtual)
-    throw std::runtime_error("No current directory");
+  if (name == "root")
+  {
+    root->listItems();
+    return;
+  }
+  
+  if (name.empty())
+  {
+    currentPathVirtual->listItems();
+    return;
+  }
+  
+  std::filesystem::path target(name);
+  std::shared_ptr<Directory> parent = resolveTargetDirectory(target.parent_path());
+  auto item = parent->getItem(target.filename().string());
+  
+  if (!(*item))
+    throw std::runtime_error("No such file or directory");
 
-  currentPathVirtual->listItems();
+  if (auto dir = std::dynamic_pointer_cast<Directory>(*item))
+    dir->listItems();
+  else
+    (*item)->display();
 }
 
 void FileSystemVirtual::cd(const std::string &name)
@@ -91,20 +121,7 @@ void FileSystemVirtual::cd(const std::string &name)
   if (!currentPathVirtual)
     throw std::runtime_error("No current directory");
 
-  if (name == "..")
-  {
-    auto parent = currentPathVirtual->getParent();
-    if (!parent)
-      throw std::runtime_error("Already at root directory");
-    currentPathVirtual = std::dynamic_pointer_cast<Directory>(parent);
-    return;
-  }
-
-  auto item = currentPathVirtual->getItem(name);
-  auto dir = std::dynamic_pointer_cast<Directory>(*item);
-  if (!dir)
-    throw std::runtime_error("Directory not found");
-  currentPathVirtual = dir;
+  currentPathVirtual = navigate(name);
 }
 
 void FileSystemVirtual::remove(const std::string &name)
@@ -112,11 +129,19 @@ void FileSystemVirtual::remove(const std::string &name)
   if (!currentPathVirtual)
     throw std::runtime_error("No current directory");
 
-  auto item = currentPathVirtual->getItem(name);
-  currentPathVirtual->deleteItem(item);
+  std::filesystem::path target(name);
+  std::string itemName = target.filename().string();
+  std::shared_ptr<Directory> targetDir = resolveTargetDirectory(name);
+
+  targetDir->deleteItem(targetDir->getItem(itemName));
 }
 
 void FileSystemVirtual::pwd() const
+{
+    std::cout << getCurrentVirtual().string();
+}
+
+std::filesystem::path FileSystemVirtual::getCurrentVirtual() const
 {
     if (!currentPathVirtual)
         throw std::runtime_error("No current directory");
@@ -130,17 +155,74 @@ void FileSystemVirtual::pwd() const
         temp = std::dynamic_pointer_cast<Directory>(temp->getParent());
     }
 
+    std::stringstream ss;
     for (auto it = pathParts.rbegin(); it != pathParts.rend(); ++it)
     {
-        std::cout << *it;
+        ss << *it;
         if (it + 1 != pathParts.rend())
-            std::cout << "/";
+            ss << "/";
     }
+    return std::filesystem::path(ss.str());
 }
 
-std::shared_ptr<FileSystemItem> FileSystemVirtual::getItem(const std::string &name) const
+std::shared_ptr<Directory> FileSystemVirtual::navigate(const std::filesystem::path &path) const
 {
-    if (!currentPathVirtual)
-        throw std::runtime_error("No current directory");
-    return *currentPathVirtual->getItem(name);
+    std::shared_ptr<Directory> current;
+    auto it = path.begin();
+
+    if (it != path.end() && *it == "root")
+    {
+        current = root;
+        ++it;
+    }
+    else
+    {
+        current = currentPathVirtual;
+    }
+
+    while(it != path.end())
+    {
+        if (*it == "..")
+        {
+            auto parent = current->getParent();
+            if (!parent)
+                throw std::runtime_error("Already at root directory");
+            current = std::dynamic_pointer_cast<Directory>(parent);
+        }
+
+        else if (*it == "." && current == root)
+        {
+            ++it;
+            continue;
+        }
+        else if (*it == "." && current != root)
+        {
+            throw std::runtime_error("Invalid path: cannot use '.' to navigate from a non-root directory");
+        }
+        else
+        {
+            auto child = *current->getItem(it->string());
+            if (!child)
+              throw std::runtime_error("No such file or directory");
+            current = std::dynamic_pointer_cast<Directory>(child);
+            if (!current)
+              throw std::runtime_error(it->string() + " is not a directory");
+        }
+        ++it;
+    }
+
+    return current;
+}
+
+std::shared_ptr<Directory> FileSystemVirtual::resolveTargetDirectory(const std::filesystem::path &target) const
+{
+    std::filesystem::path dirPart = target.parent_path();
+    std::shared_ptr<Directory> targetDir;
+
+    if (!dirPart.empty())
+        targetDir = navigate(dirPart);
+    else
+        targetDir = currentPathVirtual;
+
+    return targetDir;
 }
