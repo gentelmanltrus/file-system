@@ -6,9 +6,15 @@
 #include <unordered_map>
 #include <vector>
 #include <cstdint>
+
 FileSystem::FileSystem()
 {
   currentPhysical = getHomeDirectory();
+}
+
+FileSystem::FileSystem(const std::filesystem::path &path)
+{
+  currentPhysical = path;
 }
 
 FileSystemItem::~FileSystemItem() {}
@@ -78,22 +84,15 @@ void FileSystem::cd(const std::string &name)
     }
 }
 
-void FileSystem::quit()
-{
-  std::cout << "Exiting..." << std::endl;
-  exit(0);
-}
-
 void FileSystem::remove(const std::string &name)
 {
-    std::filesystem::path full = currentPhysical / name;
+    std::filesystem::path full = name;
     if (!std::filesystem::exists(full))
     {
-        std::cout << "rm: \"" << name << "\": no such file or directory" << std::endl;
-        return;
+        throw std::runtime_error("rm: \"" + name + "\": no such file or directory");
     }
     std::filesystem::remove_all(full);
-    std::cout << "\"" << name << "\" removed" << std::endl;
+    std::cout << "\"" << full.filename().string() << "\" removed" << std::endl;
 }
 
 void FileSystem::help() const
@@ -104,12 +103,17 @@ void FileSystem::help() const
     std::cout << "mkdir <directory>" << std::endl;
     std::cout << "create <name> [import_path]" << std::endl;
     std::cout << "import <path>" << std::endl;
+    std::cout << "switch <name>" << std::endl;
     std::cout << "cd" << std::endl;
     std::cout << "pwd" << std::endl;
     std::cout << "rm <name>" << std::endl;
     std::cout << "rm -f <name>" << std::endl;
+    std::cout << "rm -s <name>" << std::endl;
     std::cout << "alias <command> <alias>" << std::endl;
     std::cout << "unalias <alias>" << std::endl;
+    std::cout << "tree" << std::endl;
+    std::cout << "report" << std::endl;
+    std::cout << "duplicates" << std::endl;
     std::cout << "quit" << std::endl;
     std::cout << "help" << std::endl;
 }
@@ -125,7 +129,7 @@ void FileSystem::tree() const
         return;
     }
 
-    std::cout << currentPhysical.filename().string() << "\n";
+    std::cout << currentPhysical.filename().u8string() << "\n";
 
     for (auto it = std::filesystem::recursive_directory_iterator(currentPhysical); it != std::filesystem::recursive_directory_iterator(); ++it) {
         auto depth = it.depth();
@@ -201,6 +205,7 @@ void FileSystem::duplicates() const
                 for (const auto& path : dupFiles) {
                     std::cout << "  -> " << fs::relative(path, currentPhysical).string() << "\n";
                 }
+                std::cout << std::endl;
             }
         }
     }
@@ -242,7 +247,7 @@ void FileSystem::report() const
         std::cout << "Type: " << ext << " Amount: " << info.count << "\n";
         if (info.count > 0) {
             std::cout << "  Biggest file: " << info.largestFilePath.filename().string() 
-                      << " (" << info.maxSize << " bytes)\n";
+                      << " (" << info.maxSize << " bytes)\n\n";
         }
     }
 }
@@ -261,4 +266,9 @@ std::filesystem::path FileSystem::getHomeDirectory()
     }
 
     return std::filesystem::current_path();
+}
+
+std::filesystem::path FileSystem::getCurrentPhysical() const 
+{ 
+    return currentPhysical; 
 }

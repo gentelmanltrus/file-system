@@ -3,16 +3,16 @@
 #include <vector>
 #include <memory>
 #include <iostream>
-Directory::Directory(const std::filesystem::path &name)
-    : FileSystemItem(name) {}
+Directory::Directory(const std::filesystem::path &name, std::shared_ptr<FileSystemItem> parent)
+    : FileSystemItem(name, parent) {}
 
 bool Directory::contains(const std::string &name)
 {
     return std::find_if(items.begin(), items.end(),
-        [&name](const std::shared_ptr<FileSystemItem>& item)
-        {
-            return item->getName() == name;
-        }) != items.end();
+                        [&name](const std::shared_ptr<FileSystemItem> &item)
+                        {
+                            return item->getName() == name;
+                        }) != items.end();
 }
 
 void Directory::addItem(std::shared_ptr<FileSystemItem> item)
@@ -22,7 +22,7 @@ void Directory::addItem(std::shared_ptr<FileSystemItem> item)
 
 void Directory::display() const
 {
-    std::cout << "DIR: " << name.string() << std::endl;
+    std::cout << name.filename().string() << "/" << std::endl;
 }
 
 void Directory::listItems() const
@@ -31,4 +31,21 @@ void Directory::listItems() const
     {
         item->display();
     }
+}
+
+std::vector<std::shared_ptr<FileSystemItem>>::const_iterator Directory::getItem(const std::string &name) const
+{
+    for (auto it = items.cbegin(); it != items.cend(); ++it)
+    {
+        if ((*it)->getName().filename().string() == name)
+        {
+            return it;
+        }
+    }
+    throw std::runtime_error("Item not found");
+}
+
+void Directory::deleteItem(std::vector<std::shared_ptr<FileSystemItem>>::const_iterator it)
+{
+    items.erase(it);
 }

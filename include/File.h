@@ -8,7 +8,7 @@
 class File : public FileSystemItem
 {
 public:
-    File(const std::filesystem::path &name);
+    File(const std::filesystem::path &name, std::shared_ptr<FileSystemItem> parent = nullptr);
     void display() const override;
 };
 #endif // FILE_H_9825024

@@ -13,12 +13,13 @@ protected:
 
 public:
     FileSystem(); // initialize currentPhysical as root
+    FileSystem(const std::filesystem::path &path); // initialize currentPhysical as path
+    virtual ~FileSystem() = default;
 
     virtual void mkdir(const std::string &name);
     virtual void touch(const std::string &name);
     virtual void ls() const;
     virtual void cd(const std::string &name);
-    virtual void quit();
     virtual void remove(const std::string &name);
     virtual void help() const;
     virtual void pwd() const;
@@ -26,5 +27,6 @@ public:
     void report() const;
     void duplicates() const;
     static std::filesystem::path getHomeDirectory();
+    std::filesystem::path getCurrentPhysical() const;
 };
 #endif // FILESYSTEM_H_28539235

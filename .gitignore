@@ -2,3 +2,6 @@
 *.o
 *.cbp
 *.layout
+obj/*
+!obj/.gitkeep
+virtual_folder/

@@ -1,39 +1,39 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra
 
-OBJ = src/main.o \
-      src/CommandProcessor.o \
-      src/Directory.o \
-      src/File.o \
-      src/FileSystem.o \
-      src/FileSystemItem.o \
-      src/FileSystemVirtual.o
+OBJ = obj/main.o \
+      obj/CommandProcessor.o \
+      obj/Directory.o \
+      obj/File.o \
+      obj/FileSystem.o \
+      obj/FileSystemItem.o \
+      obj/FileSystemVirtual.o
 
 all: file-system.exe
 
 file-system.exe: ${OBJ}
 	${CXX} ${CXXFLAGS} -o file-system.exe ${OBJ}
 
-src/main.o: src/main.cpp
-	${CXX} ${CXXFLAGS} -c src/main.cpp -o src/main.o
+obj/main.o: src/main.cpp
+	${CXX} ${CXXFLAGS} -c src/main.cpp -o obj/main.o
 
-src/CommandProcessor.o: src/CommandProcessor.cpp
-	${CXX} ${CXXFLAGS} -c src/CommandProcessor.cpp -o src/CommandProcessor.o
+obj/CommandProcessor.o: src/CommandProcessor.cpp
+	${CXX} ${CXXFLAGS} -c src/CommandProcessor.cpp -o obj/CommandProcessor.o
 
-src/Directory.o: src/Directory.cpp
-	${CXX} ${CXXFLAGS} -c src/Directory.cpp -o src/Directory.o
+obj/Directory.o: src/Directory.cpp
+	${CXX} ${CXXFLAGS} -c src/Directory.cpp -o obj/Directory.o
 
-src/File.o: src/File.cpp
-	${CXX} ${CXXFLAGS} -c src/File.cpp -o src/File.o
+obj/File.o: src/File.cpp
+	${CXX} ${CXXFLAGS} -c src/File.cpp -o obj/File.o
 
-src/FileSystem.o: src/FileSystem.cpp
-	${CXX} ${CXXFLAGS} -c src/FileSystem.cpp -o src/FileSystem.o
+obj/FileSystem.o: src/FileSystem.cpp
+	${CXX} ${CXXFLAGS} -c src/FileSystem.cpp -o obj/FileSystem.o
 
-src/FileSystemItem.o: src/FileSystemItem.cpp
-	${CXX} ${CXXFLAGS} -c src/FileSystemItem.cpp -o src/FileSystemItem.o
+obj/FileSystemItem.o: src/FileSystemItem.cpp
+	${CXX} ${CXXFLAGS} -c src/FileSystemItem.cpp -o obj/FileSystemItem.o
 
-src/FileSystemVirtual.o: src/FileSystemVirtual.cpp
-	${CXX} ${CXXFLAGS} -c src/FileSystemVirtual.cpp -o src/FileSystemVirtual.o
+obj/FileSystemVirtual.o: src/FileSystemVirtual.cpp
+	${CXX} ${CXXFLAGS} -c src/FileSystemVirtual.cpp -o obj/FileSystemVirtual.o
 
 clean:
-	del /f *.exe src\*.o
+	del /f *.exe obj\*.o
