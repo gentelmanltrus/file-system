@@ -137,11 +137,11 @@ void FileSystem::help() const
     std::cout << "touch <path/file-name> - creates an empty file at the specified path." << std::endl;
     std::cout << "ls <path> - lists all items in the directory at the given path." << std::endl;
     std::cout << "ls - lists all items in the current working directory." << std::endl;
-    std::cout << "mkdir <directory-name> - creates a new directory at the specified path." << std::endl;
-    std::cout << "create <file-system-name> [absolute-path] - creates a new virtual file system with the specified name. Optionally imports files from the given path." << std::endl;
+    std::cout << "mkdir <directory-name> - creates a new empty directory at the specified path." << std::endl;
+    std::cout << "create <file-system-name> [absolute-path] - creates a new virtual file system with the specified name. Optionally imports files/folders from the given path." << std::endl;
     std::cout << "import <absolute-path> - imports files from the specified path into the current virtual file system." << std::endl;
-    std::cout << "switch <file-system-name> - switches to the virtual file system with the specified name." << std::endl;
-    std::cout << "delete <file-system-name> - deletes the specified file or directory." << std::endl;
+    std::cout << "switch <file-system-name> - switches to file system with the specified name." << std::endl;
+    std::cout << "delete <file-system-name> - deletes the specified virtual file system." << std::endl;
     std::cout << "cd <path> - changes the current working directory." << std::endl;
     std::cout << "pwd - prints the current working directory to the terminal." << std::endl;
     std::cout << "rm <item-name> - removes the specified file or directory." << std::endl;
