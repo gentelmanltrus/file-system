@@ -19,21 +19,69 @@ FileSystem::FileSystem(const std::filesystem::path &path)
 
 FileSystemItem::~FileSystemItem() {}
 
+// long path, non relative
 void FileSystem::mkdir(const std::string &name)
 {
-  std::filesystem::path full = currentPhysical / name;
-  std::filesystem::create_directories(full);
+    std::filesystem::path target(name);
+    std::filesystem::path full;
+    //if relative just get it
+    //if non relative + it to full
+
+    if (target.is_absolute()) 
+    {
+        full = target;
+    } 
+    else {
+        full = currentPhysical / target;
+    }
+
+    // create_directories
+    std::filesystem::create_directories(full);
 }
 
 void FileSystem::touch(const std::string &name)
 {
-  std::filesystem::path full = currentPhysical / name;
-  std::ofstream file(full);
+    std::filesystem::path target(name);
+    std::filesystem::path full;
+
+    if (target.is_absolute()) 
+    {
+        full = target;
+    } else {
+        full = currentPhysical / target;
+    }
+
+    if (!std::filesystem::exists(full.parent_path())) 
+    {
+        throw std::runtime_error("touch: parent directory does not exist");
+    }
+
+    if (std::filesystem::exists(full)) 
+    {
+        throw std::runtime_error("touch: file already exists");
+    }
+
+    std::ofstream file(full);
+    if (!file) {
+        throw std::runtime_error("touch: failed to create file");
+    }
 }
 
-void FileSystem::ls() const
+void FileSystem::ls(const std::string &name) const
 {
-  for (const auto &entry : std::filesystem::directory_iterator(currentPhysical))
+  std::filesystem::path target(name);
+  std::filesystem::path full;
+
+  if (target.is_absolute()) 
+  {
+    full = target;
+  } 
+  else 
+  {
+    full = currentPhysical / target;
+  }
+
+  for (const auto &entry : std::filesystem::directory_iterator(full))
   {
     std::cout << entry.path().filename().string() << std::endl;
   }
@@ -41,21 +89,40 @@ void FileSystem::ls() const
 
 void FileSystem::cd(const std::string &name)
 {
-    std::filesystem::path target = currentPhysical / name;
+    std::filesystem::path target(name);
+    std::filesystem::path full;
+    // CHECK IF DIR OR FILE IS REAL
+    if (target.is_absolute()) 
+    {
+        full = target;
+    } 
+    else 
+    {
+        full = currentPhysical / target;
+    }
 
-    if (std::filesystem::is_directory(target))
-    {
-        currentPhysical = std::filesystem::canonical(target);
-    }
-    else
-    {
-      std::cout << "Directory does not exist" << std::endl;
-    }
+    if (!std::filesystem::exists(full))
+        throw std::runtime_error("cd: path does not exist");
+
+    if (!std::filesystem::is_directory(full))
+        throw std::runtime_error("cd: not a directory");
+
+    currentPhysical = std::filesystem::weakly_canonical(full);
 }
 
 void FileSystem::remove(const std::string &name)
 {
-    std::filesystem::path full = name;
+    std::filesystem::path target(name);
+    std::filesystem::path full;
+    if (target.is_absolute()) 
+    {
+        full = target;
+    } 
+    else 
+    {
+        full = currentPhysical / target;
+    }
+    
     if (!std::filesystem::exists(full))
     {
         throw std::runtime_error("rm: \"" + name + "\": no such file or directory");
@@ -67,24 +134,27 @@ void FileSystem::remove(const std::string &name)
 void FileSystem::help() const
 {
     std::cout << "Available commands:" << std::endl;
-    std::cout << "touch <filename>" << std::endl;
-    std::cout << "ls" << std::endl;
-    std::cout << "mkdir <directory>" << std::endl;
-    std::cout << "create <name> [import_path]" << std::endl;
-    std::cout << "import <path>" << std::endl;
-    std::cout << "switch <name>" << std::endl;
-    std::cout << "cd" << std::endl;
-    std::cout << "pwd" << std::endl;
-    std::cout << "rm <name>" << std::endl;
-    std::cout << "rm -f <name>" << std::endl;
-    std::cout << "rm -s <name>" << std::endl;
-    std::cout << "alias <command> <alias>" << std::endl;
-    std::cout << "unalias <alias>" << std::endl;
-    std::cout << "tree" << std::endl;
-    std::cout << "report" << std::endl;
-    std::cout << "duplicates" << std::endl;
-    std::cout << "quit" << std::endl;
-    std::cout << "help" << std::endl;
+    std::cout << "touch <path/file-name> - creates an empty file at the specified path." << std::endl;
+    std::cout << "ls <path> - lists all items in the directory at the given path." << std::endl;
+    std::cout << "ls - lists all items in the current working directory." << std::endl;
+    std::cout << "mkdir <directory-name> - creates a new directory at the specified path." << std::endl;
+    std::cout << "create <file-system-name> [absolute-path] - creates a new virtual file system with the specified name. Optionally imports files from the given path." << std::endl;
+    std::cout << "import <absolute-path> - imports files from the specified path into the current virtual file system." << std::endl;
+    std::cout << "switch <file-system-name> - switches to the virtual file system with the specified name." << std::endl;
+    std::cout << "delete <file-system-name> - deletes the specified file or directory." << std::endl;
+    std::cout << "cd <path> - changes the current working directory." << std::endl;
+    std::cout << "pwd - prints the current working directory to the terminal." << std::endl;
+    std::cout << "rm <item-name> - removes the specified file or directory." << std::endl;
+    std::cout << "rm -f <item-name> - forces removal of the specified file or directory." << std::endl;
+    std::cout << "rm -s <item-name> - removes the specified file or directory from both the physical and virtual file systems." << std::endl;
+    std::cout << "alias <command> <command-alias> - Creates an alias for the specified command." << std::endl;
+    std::cout << "alias - lists all created aliases." << std::endl;
+    std::cout << "unalias <command-alias> - removes the specified alias." << std::endl;
+    std::cout << "tree - displays the directory structure in a tree format." << std::endl;
+    std::cout << "report - generates a report of the file system." << std::endl;
+    std::cout << "duplicates - lists duplicate files in the file system." << std::endl;
+    std::cout << "quit - exits the file system." << std::endl;
+    std::cout << "help - lists all available commands with their descriptions." << std::endl;
 }
 
 void FileSystem::pwd() const
@@ -215,7 +285,7 @@ void FileSystem::report() const
     for (const auto& [ext, info] : reportMap) {
         std::cout << "Type: " << ext << " Amount: " << info.count << "\n";
         if (info.count > 0) {
-            std::cout << "  Biggest file: " << info.largestFilePath.filename().string() 
+            std::cout << "  Biggest file: " << info.largestFilePath.string() 
                       << " (" << info.maxSize << " bytes)\n\n";
         }
     }

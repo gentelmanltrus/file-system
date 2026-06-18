@@ -7,16 +7,20 @@ CommandProcessor::CommandProcessor()
     {
         std::string existingCommand;
         std::string newAlias;
+        ss >> existingCommand >> newAlias;
 
-        if (!(ss >> existingCommand))
+        if (existingCommand.empty() && newAlias.empty())
         {
             for (const auto &pair : aliases)
             {
                 std::cout << pair.first << " -> " << pair.second << std::endl;
             }
+            return;
         }
-        if (!(ss >> newAlias))
-            throw std::runtime_error("alias: missing new alias");
+        else if (existingCommand.empty() || newAlias.empty())
+        {
+            throw std::runtime_error("alias: missing existing command or new alias");
+        }
 
         auto itCommands1 = commands.find(existingCommand);
         if (itCommands1 == commands.end())
@@ -59,9 +63,13 @@ CommandProcessor::CommandProcessor()
         currentFileSystem->second->touch(fileName);
     };
 
-    commands["ls"] = [this](std::stringstream &)
+    commands["ls"] = [this](std::stringstream &ss)
     {
-        currentFileSystem->second->ls();
+        std::string name;
+        if (!(ss >> name))
+            name = "";
+
+        currentFileSystem->second->ls(name);
     };
 
     commands["mkdir"] = [this](std::stringstream &ss)
@@ -204,20 +212,20 @@ CommandProcessor::CommandProcessor()
                 throw std::runtime_error(
                     "rm: strict mode is only supported in virtual file systems");
 
-            auto item = virtualFileSystem->getItem(name);
-            currentFileSystem->second->FileSystem::remove(item->getName().string());
+            std::filesystem::path target(name);
+            target = std::filesystem::current_path() / VIRTUAL_FOLDER_NAME / target.filename();
+            if (!std::filesystem::exists(target))
+                throw std::runtime_error("rm: strict mode: file does not exist in physical file system " + target.string());
+            currentFileSystem->second->FileSystem::remove(target.string());
         }
-        
+
         if (isVirtual)
         {
-            auto item = virtualFileSystem->getItem(name);
-            currentFileSystem->second->remove(item->getName().filename().string());
+            currentFileSystem->second->remove(name);
         }
         else
         {
-            auto currentPhysical = currentFileSystem->second->getCurrentPhysical();
-            auto full = currentPhysical / name;
-            currentFileSystem->second->FileSystem::remove(full.string());
+            currentFileSystem->second->FileSystem::remove(name);
         }
     };
 
